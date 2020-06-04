@@ -1,0 +1,2 @@
+64tass -c sour16.asm -L sour16.lst -o sour16.prg
+../bin/x16emu -debug -scale 2 -prg sour16.prg -run

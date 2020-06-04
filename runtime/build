@@ -1,0 +1,1 @@
+64tass -c sour16.asm -L sour16.lst -o sour16.prg

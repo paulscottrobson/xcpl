@@ -1,0 +1,75 @@
+
+; 64tass Turbo Assembler Macro V1.55.2200 listing file
+; 64tass -c -L sour16.lst -o sour16.prg sour16.asm
+; Thu Jun  4 10:02:49 2020
+
+;Offset	;Hex		;Monitor	;Source
+
+;******  Processing input file: sour16.asm
+
+>0000					Vars:	.fill 	16*2
+>0020					temp0:	.fill 	2
+>0022					pctr:	.fill 	2
+.1000					Sour16Base:
+.1000	a9 b0		lda #$b0			lda 	#TestCode & $FF
+.1002	85 22		sta $22				sta 	pctr
+.1004	a9 11		lda #$11			lda 	#TestCode >> 8
+.1006	85 23		sta $23				sta 	pctr+1
+.1008	a0 00		ldy #$00			ldy 	#0
+.100a					Sour16Next:
+>100a	ff						.byte 	$FF
+.100b	b1 22		lda ($22),y			lda 	(pctr),y 					; get the opcode
+.100d	29 f0		and #$f0			and 	#$F0
+.100f	8d 1a 10	sta $101a			sta 	S16NJmp+1 					; modify the jump address
+.1012	b1 22		lda ($22),y			lda 	(pctr),y  					; get the opcode
+.1014	29 0f		and #$0f			and 	#15 						; point to the register , this value
+.1016	0a		asl a				asl 	a 							; (reg# x 2) is also in A.
+.1017	aa		tax				tax
+.1018	c8		iny				iny 								; skip the opcode.
+.1019					S16NJmp:
+.1019	4c 00 11	jmp $1100			jmp 	Sour16RootCommandSet
+.1100					Sour16RootCommandSet:
+.1100	ea		nop				nop
+>1101							.align 	16
+.1110	ea		nop				nop
+>1111							.align 	16
+.1120	ea		nop				nop
+>1121							.align 	16
+.1130	ea		nop				nop
+>1131							.align 	16
+.1140	ea		nop				nop
+>1141							.align 	16
+.1150	ea		nop				nop
+>1151							.align 	16
+.1160	ea		nop				nop
+>1161							.align 	16
+.1170	ea		nop				nop
+>1171							.align 	16
+.1180	ea		nop				nop
+>1181							.align 	16
+.1190					Command_LoadConst:
+.1190	b1 22		lda ($22),y			lda 	(pctr),y 					; copy the first byte in
+.1192	95 00		sta $00,x			sta 	Vars,X
+.1194	c8		iny				iny
+.1195	b1 22		lda ($22),y			lda 	(pctr),y 					; copy the second byte in
+.1197	95 01		sta $01,x			sta 	Vars+1,X
+.1199					Command_IncYNext:
+.1199	c8		iny				iny
+.119a	4c 0a 10	jmp $100a			jmp 	Sour16Next
+>119d							.align 	16
+.11a0					Command_AddConst:
+.11a0	18		clc				clc
+.11a1	b1 22		lda ($22),y			lda 	(pctr),y 					; first calculation, LSB
+.11a3	75 00		adc $00,x			adc 	Vars,X
+.11a5	95 00		sta $00,x			sta 	Vars,X
+.11a7	c8		iny				iny
+.11a8	b1 22		lda ($22),y			lda 	(pctr),y 					; second calculation, LSB
+.11aa	75 01		adc $01,x			adc 	Vars+1,X
+.11ac	95 01		sta $01,x			sta 	Vars+1,X
+.11ae	80 e9		bra $1199			bra 	Command_IncYNext			; co-opt the end of load const.
+.11b0					TestCode:
+>11b0	92 09 47					.byte 	$92,$09,$47
+>11b3	a2 fe 01					.byte 	$A2,$FE,$01
+>11b6	a0 ff ff					.byte 	$A0,$FF,$FF
+
+;******  End of listing
