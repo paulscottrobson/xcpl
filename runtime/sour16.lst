@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
-; 64tass -c -L sour16.lst -o sour16.prg sour16.asm
-; Thu Jun  4 12:31:51 2020
+; 64tass -c -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
+; Thu Jun  4 14:38:06 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -9,36 +9,17 @@
 
 >0000					Vars:	.fill 	16*2 						; registers in low/high byte pairs
 >0020					pctr:	.fill 	2							; address of current routine.
+>0022					temp0:	.fill 	2
 .1000					Sour16Base:
-.1000	4c 08 10	jmp $1008			jmp 	RunProgram
+.1000	4c 0e 12	jmp $120e			jmp 	RunProgram
 .1003	ea		nop				nop
 .1004					StartVector:
->1004	7f 11 00 00					.word 	TestCode,0
-.1008					RunProgram:
-.1008	a2 ff		ldx #$ff			ldx 	#$FF 						; reset stack
-.100a	9a		txs				txs
-.100b	ad 04 10	lda $1004			lda 	StartVector 				; load the initial program counter value.
-.100e	85 20		sta $20				sta 	pctr
-.1010	ad 05 10	lda $1005			lda 	StartVector+1
-.1013	85 21		sta $21				sta 	pctr+1
-.1015	a0 00		ldy #$00			ldy 	#0
-.1017					Sour16Next:
->1017	ff						.byte 	$FF
-.1018	b1 20		lda ($20),y			lda 	(pctr),y 					; get the opcode
-.101a	29 f0		and #$f0			and 	#$F0
-.101c	8d 27 10	sta $1027			sta 	S16NJmp+1 					; modify the jump address
-.101f	b1 20		lda ($20),y			lda 	(pctr),y  					; get the opcode
-.1021	29 0f		and #$0f			and 	#15 						; point to the register , this value
-.1023	0a		asl a				asl 	a 							; (reg# x 2) is also in A.
-.1024	aa		tax				tax
-.1025	c8		iny				iny 								; skip the opcode.
-.1026					S16NJmp:
-.1026	4c 00 11	jmp $1100			jmp 	Sour16RootCommandSet
-.10f0					MiscellaneousHandler:
->10f0	cd ab						.word 	$ABCD
+>1004	2f 12 00 00					.word 	TestCode,0
+.10e0					MiscellaneousHandler:
+>10e0	cd ab						.word 	$ABCD
 .1100					Sour16RootCommandSet:
 .1100					Command_Miscellaneous:
-.1100	80 ee		bra $10f0			bra 	MiscellaneousHandler
+.1100	80 de		bra $10e0			bra 	MiscellaneousHandler
 >1102							.align 	16
 .1110					Command_LoadConst:
 .1110	b1 20		lda ($20),y			lda 	(pctr),y 					; copy the first byte in
@@ -48,7 +29,7 @@
 .1117	95 01		sta $01,x			sta 	Vars+1,X
 .1119					Command_IncYNext:
 .1119	c8		iny				iny
-.111a	4c 17 10	jmp $1017			jmp 	Sour16Next
+.111a	4c 1d 12	jmp $121d			jmp 	Sour16Next
 >111d							.align 	16
 .1120					Command_AddConst:
 .1120	18		clc				clc
@@ -69,7 +50,7 @@
 .1137	b5 01		lda $01,x			lda 	Vars+1,x
 .1139	75 03		adc $03,x			adc 	Vars+3,x
 .113b	95 01		sta $01,x			sta		Vars+1,x
-.113d	4c 17 10	jmp $1017			jmp 	Sour16Next
+.113d	4c 1d 12	jmp $121d			jmp 	Sour16Next
 >1140							.align 	16
 .1140					Command_SubRegister:
 .1140	38		sec				sec
@@ -79,7 +60,7 @@
 .1147	b5 01		lda $01,x			lda 	Vars+1,x
 .1149	f5 03		sbc $03,x			sbc 	Vars+3,x
 .114b	95 01		sta $01,x			sta		Vars+1,x
-.114d	4c 17 10	jmp $1017			jmp 	Sour16Next
+.114d	4c 1d 12	jmp $121d			jmp 	Sour16Next
 >1150							.align 	16
 .1150					Command_AndRegister:
 .1150	b5 00		lda $00,x			lda 	Vars,x
@@ -88,7 +69,7 @@
 .1156	b5 01		lda $01,x			lda 	Vars+1,x
 .1158	35 03		and $03,x			and 	Vars+3,x
 .115a	95 01		sta $01,x			sta		Vars+1,x
-.115c	4c 17 10	jmp $1017			jmp 	Sour16Next
+.115c	4c 1d 12	jmp $121d			jmp 	Sour16Next
 >115f							.align 	16
 .1160					Command_OrRegister:
 .1160	b5 00		lda $00,x			lda 	Vars,x
@@ -97,7 +78,7 @@
 .1166	b5 01		lda $01,x			lda 	Vars+1,x
 .1168	15 03		ora $03,x			ora 	Vars+3,x
 .116a	95 01		sta $01,x			sta		Vars+1,x
-.116c	4c 17 10	jmp $1017			jmp 	Sour16Next
+.116c	4c 1d 12	jmp $121d			jmp 	Sour16Next
 >116f							.align 	16
 .1170					Command_XorRegister:
 .1170	b5 00		lda $00,x			lda 	Vars,x
@@ -106,10 +87,112 @@
 .1176	b5 01		lda $01,x			lda 	Vars+1,x
 .1178	55 03		eor $03,x			eor 	Vars+3,x
 .117a	95 01		sta $01,x			sta		Vars+1,x
-.117c	4c 17 10	jmp $1017			jmp 	Sour16Next
-.117f					TestCode:
->117f	12 09 47					.byte 	$12,$09,$47
->1182	13 fe ff					.byte 	$13,$FE,$FF
->1185	42						.byte 	$42
+.117c	4c 1d 12	jmp $121d			jmp 	Sour16Next
+>117f							.align 	16
+.1180					Command_StoreByteInd:
+.1180	b5 00		lda $00,x			lda 	Vars,x 						; value to write
+.1182	92 00		sta ($00)			sta 	(Vars) 						; store indirect via R0.
+.1184	4c 1d 12	jmp $121d			jmp 	Sour16Next
+>1187							.align 	16
+.1190					Command_LoadWordInd:
+.1190	8e 97 11	stx $1197			stx 	CLWI0+1 					; set to load high byte
+.1193	5a		phy				phy 								; load the high byte to variable
+.1194	a0 01		ldy #$01			ldy 	#1
+.1196					CLWI0:
+.1196	b1 00		lda ($00),y			lda 	($00),y 					; read the high byte.
+.1198	a8		tay				tay 								; put it in Y temporarily.
+.1199	80 08		bra $11a3			bra 	CLBIEntrance 				; and do the low code
+>119b							.align 	16
+.11a0					Command_LoadByteInd:
+.11a0	5a		phy				phy  								; save Y
+.11a1	a0 00		ldy #$00			ldy 	#0 							; zero high byte value.
+.11a3					CLBIEntrance:
+.11a3	8e a7 11	stx $11a7			stx 	CLBI0+1 					; set to load low byte
+.11a6					CLBI0:
+.11a6	b2 00		lda ($00)			lda 	($00) 						; read the low byte.
+.11a8	95 00		sta $00,x			sta 	Vars,x 						; save it into the variable.
+.11aa	94 01		sty $01,x			sty 	Vars+1,x
+.11ac	7a		ply				ply 								; restore Y
+.11ad	4c 1d 12	jmp $121d			jmp 	Sour16Next
+>11b0							.align 	16
+.11b0					Command_Shift:
+.11b0	b5 02		lda $02,x			lda 	Vars+2,x 					; the LSB of the second register
+.11b2	f0 04		beq $11b8			beq 	Shift_None 					; no shift
+.11b4	30 4e		bmi $1204			bmi 	Shift_Right 				; is a signed value - is shift right logical
+.11b6	80 42		bra $11fa			bra 	Shift_Left 					; + is shift left logical.
+.11b8					Shift_None:
+.11b8	4c 1d 12	jmp $121d			jmp 	Sour16Next
+>11bb							.align 	16
+.11c0					Command_LoadWordDirect:
+.11c0	b1 20		lda ($20),y			lda 	(pctr),y 					; copy address to temp0
+.11c2	c8		iny				iny
+.11c3	85 22		sta $22				sta 	temp0
+.11c5	b1 20		lda ($20),y			lda 	(pctr),y
+.11c7	c8		iny				iny
+.11c8	85 23		sta $23				sta 	temp0+1
+.11ca	b2 22		lda ($22)			lda 	(temp0) 					; read LSB
+.11cc	95 00		sta $00,x			sta 	Vars,x
+.11ce	5a		phy				phy 								; read MSB
+.11cf	a0 01		ldy #$01			ldy 	#1
+.11d1	b1 22		lda ($22),y			lda 	(temp0),y
+.11d3	95 01		sta $01,x			sta 	Vars+1,x
+.11d5	7a		ply				ply
+.11d6	4c 1d 12	jmp $121d			jmp 	Sour16Next
+>11d9							.align 	16
+.11e0					Command_StoreIndirectAdvance:
+.11e0	b5 00		lda $00,x			lda 	Vars,X 						; get LSB and write out
+.11e2	92 00		sta ($00)			sta 	(Vars) 						; to R0
+.11e4	b5 01		lda $01,x			lda 	Vars+1,X 					; get MSB
+.11e6	5a		phy				phy 								; save program pos
+.11e7	a0 01		ldy #$01			ldy 	#1 							; write MSB
+.11e9	91 00		sta ($00),y			sta 	(Vars),y
+.11eb	7a		ply				ply 								; restore program position
+.11ec	18		clc				clc
+.11ed	a5 00		lda $00				lda 	Vars 						; bump by 2
+.11ef	69 02		adc #$02			adc 	#2
+.11f1	85 00		sta $00				sta 	Vars
+.11f3	90 02		bcc $11f7			bcc 	CSIANoCarry 				; carry to MSB
+.11f5	e6 01		inc $01				inc 	Vars+1
+.11f7					CSIANoCarry:
+.11f7	4c 1d 12	jmp $121d			jmp 	Sour16Next
+.11fa					Shift_Left:
+.11fa	16 00		asl $00,x			asl 	Vars,x
+.11fc	36 01		rol $01,x			rol 	Vars+1,x
+.11fe	3a		dec a				dec 	a
+.11ff	d0 f9		bne $11fa			bne 	Shift_Left
+.1201	4c 1d 12	jmp $121d			jmp 	Sour16Next
+.1204					Shift_Right:
+.1204	56 01		lsr $01,x			lsr 	Vars+1,x
+.1206	76 00		ror $00,x			ror 	Vars,x
+.1208	1a		inc a				inc 	a
+.1209	d0 f9		bne $1204			bne 	Shift_Right
+.120b	4c 1d 12	jmp $121d			jmp 	Sour16Next
+.120e					RunProgram:
+.120e	a2 ff		ldx #$ff			ldx 	#$FF 						; reset stack
+.1210	9a		txs				txs
+.1211	ad 04 10	lda $1004			lda 	StartVector 				; load the initial program counter value.
+.1214	85 20		sta $20				sta 	pctr
+.1216	ad 05 10	lda $1005			lda 	StartVector+1
+.1219	85 21		sta $21				sta 	pctr+1
+.121b	a0 00		ldy #$00			ldy 	#0
+.121d					Sour16Next:
+>121d	ff						.byte 	$FF
+.121e	b1 20		lda ($20),y			lda 	(pctr),y 					; get the opcode
+.1220	c8		iny				iny 								; skip the opcode.
+.1221	aa		tax				tax 								; save in X
+.1222	29 f0		and #$f0			and 	#$F0
+.1224	8d 2d 12	sta $122d			sta 	S16NJmp+1 					; modify the jump address
+.1227	8a		txa				txa 			 					; get the opcode back from X
+.1228	29 0f		and #$0f			and 	#15 						; index into the register block.
+.122a	0a		asl a				asl 	a 							; (reg# x 2) is also in A.
+.122b	aa		tax				tax
+.122c					S16NJmp:
+.122c	4c 00 11	jmp $1100			jmp 	Sour16RootCommandSet
+.122f					TODO:
+.122f					Implement:
+.122f					TestCode:
+>122f	10 e0 10					.byte 	$10,$E0,$10
+>1232	12 34 fe					.byte 	$12,$34,$FE
+>1235	e2						.byte 	$E2
 
 ;******  End of listing

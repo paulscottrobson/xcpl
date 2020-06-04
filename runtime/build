@@ -1,1 +1,2 @@
-64tass -c sour16.asm -L sour16.lst -o sour16.prg
+#!/bin/bash
+64tass -c sour16.asm -L sour16.lst -o sour16.prg -l sour16.lbl
