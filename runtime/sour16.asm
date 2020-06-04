@@ -69,7 +69,7 @@ Sour16Next:
 S16NJmp:
 		jmp 	Sour16RootCommandSet
 
-
+		.include	"sourextras.asm"
 
 ; 	0x Miscellaneous
 ;			jsr ret tests and branches code caller
@@ -93,13 +93,14 @@ S16NJmp:
 TODO:
 
 Implement:
-;	* Misc 
 ; 	* External Multiply, Divide, Negate.
 
 TestCode:
-		.byte 	$10,$E0,$10
-		.byte 	$12,$34,$FE
-		.byte 	$E2
+		.byte 	$12,$01,$04 		; R2 * R3
+		.byte 	$13,$34,$02
+		.byte 	$1F,$02,$00 		; tell it R2 is low register
+		.byte 	$09,Multiply & $FF,Multiply >> 8
+
 
 
 ; Expr returns : Reference, Calculated value, Constant (one only), Test Result.

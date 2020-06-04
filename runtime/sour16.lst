@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Thu Jun  4 14:43:30 2020
+; Thu Jun  4 18:17:31 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -12,14 +12,115 @@
 >0022					temp0:	.fill 	2
 .1000					Sour16Base:
 .1000	4c 0e 12	jmp $120e			jmp 	RunProgram
-.1003	ea		nop				nop
+.1003	ea		nop				nop 								; pad to 4 bytes.
 .1004					StartVector:
->1004	2f 12 00 00					.word 	TestCode,0
+>1004	30 12 00 00					.word 	TestCode,0
 
 ;******  Processing file: sourmisc.asm
 
-.10e0					MiscellaneousHandler:
->10e0	cd ab						.word 	$ABCD
+=$02					TestVariable = Vars+2 						; we test on R1
+>1008							.align 	16
+.1010					TestZero:
+.1010	a5 02		lda $02				lda 	TestVariable
+.1012	05 03		ora $03				ora 	TestVariable+1
+.1014	f0 10		beq $1026			beq 	TestTrue
+.1016					TestFalse:
+.1016	64 02		stz $02				stz 	TestVariable
+.1018	64 03		stz $03				stz 	TestVariable+1
+.101a	4c 1d 12	jmp $121d			jmp 	Sour16Next
+>101d							.align 	16
+.1020					TestNonZero:
+.1020	a5 02		lda $02				lda 	TestVariable
+.1022	05 03		ora $03				ora 	TestVariable+1
+.1024	f0 f0		beq $1016			beq 	TestFalse
+.1026					TestTrue:
+.1026	a9 ff		lda #$ff			lda 	#$FF
+.1028	85 02		sta $02				sta 	TestVariable
+.102a	85 03		sta $03				sta 	TestVariable+1
+.102c	4c 1d 12	jmp $121d			jmp 	Sour16Next
+>102f							.align 	16
+.1030					TestNegative:
+.1030	a5 03		lda $03				lda 	TestVariable+1
+.1032	30 f2		bmi $1026			bmi 	TestTrue
+.1034	80 e0		bra $1016			bra 	TestFalse
+>1036							.align 	16
+.1040					TestPlus:
+.1040	a5 03		lda $03				lda 	TestVariable+1
+.1042	10 e2		bpl $1026			bpl 	TestTrue
+.1044	80 d0		bra $1016			bra 	TestFalse
+>1046							.align 	16
+.1050					BranchZero:
+.1050	a5 02		lda $02				lda 	TestVariable
+.1052	05 03		ora $03				ora 	TestVariable+1
+.1054	f0 10		beq $1066			beq 	BranchTrue
+.1056					BranchFalse:
+.1056	c8		iny				iny
+.1057	4c 1d 12	jmp $121d			jmp 	Sour16Next
+>105a							.align 	16
+.1060					BranchNonZero:
+.1060	a5 02		lda $02				lda 	TestVariable
+.1062	05 03		ora $03				ora 	TestVariable+1
+.1064	f0 f0		beq $1056			beq 	BranchFalse
+.1066					BranchTrue:
+.1066	b1 20		lda ($20),y			lda 	(pctr),y
+.1068	a8		tay				tay
+.1069	4c 1d 12	jmp $121d			jmp 	Sour16Next
+>106c							.align 	16
+.1070					BranchMinus:
+.1070	a5 03		lda $03				lda 	TestVariable+1
+.1072	30 f2		bmi $1066			bmi 	BranchTrue
+.1074	80 e0		bra $1056			bra 	BranchFalse
+>1076							.align 	16
+.1080					BranchPlus:
+.1080	a5 03		lda $03				lda 	TestVariable+1
+.1082	30 e2		bmi $1066			bmi 	BranchTrue
+.1084	80 d0		bra $1056			bra 	BranchFalse
+>1086							.align 	16
+.1090					CallSubroutine:
+.1090	5a		phy				phy 								; save offset before incrementing
+.1091	a5 21		lda $21				lda 	pctr+1 						; save PCTR Hi
+.1093	48		pha				pha
+.1094	a5 20		lda $20				lda 	pctr 						; save PCTR Lo
+.1096	48		pha				pha
+.1097	b1 20		lda ($20),y			lda 	(pctr),y 					; read new PC low into X
+.1099	aa		tax				tax
+.109a	c8		iny				iny
+.109b	b1 20		lda ($20),y			lda 	(pctr),y 					; read new PC high into A
+.109d	85 21		sta $21				sta 	pctr+1 						; update address
+.109f	86 20		stx $20				stx 	pctr
+.10a1	a0 00		ldy #$00			ldy 	#0 							; start of that routine
+.10a3	4c 1d 12	jmp $121d			jmp 	Sour16Next 					; and execute from there.
+>10a6							.align 	16
+.10b0					CallMachineCode:
+.10b0	98		tya				tya 								; work it out make PCTR the actual address
+.10b1	18		clc				clc
+.10b2	65 20		adc $20				adc 	pctr
+.10b4	85 20		sta $20				sta 	pctr
+.10b6	90 02		bcc $10ba			bcc 	CMCNoCarry
+.10b8	e6 21		inc $21				inc 	pctr+1
+.10ba					CMCNoCarry:
+.10ba	a9 00		lda #$00			lda 	#Vars 						; address of variables in A
+.10bc	20 cc 10	jsr $10cc			jsr 	MachineCodeCaller 			; call the calling code.
+.10bf	ea		nop				nop 								; and fall through to return.
+>10c0							.align 	16
+.10c0					ReturnSubroutine:
+.10c0	68		pla				pla 								; restore PC
+.10c1	85 20		sta $20				sta 	pctr
+.10c3	68		pla				pla
+.10c4	85 21		sta $21				sta 	pctr+1
+.10c6	7a		ply				ply 								; restore offset
+.10c7	c8		iny				iny 								; skip over the call address
+.10c8	c8		iny				iny
+.10c9	4c 1d 12	jmp $121d			jmp 	Sour16Next
+.10cc					MachineCodeCaller:
+.10cc	6c 20 00	jmp ($0020)			jmp 	(pctr)
+.10f7					MiscellaneousHandler:
+.10f7	0a		asl a				asl 	a 							; on entry, 2 x the LSNibble of the word
+.10f8	0a		asl a				asl 	a 							; x 4
+.10f9	0a		asl a				asl 	a 							; x 16
+.10fa	8d fe 10	sta $10fe			sta 	MHAddress+1 				; make the LSB of the jump address
+.10fd					MHAddress:
+.10fd	4c f7 10	jmp $10f7			jmp 	MiscellaneousHandler
 
 ;******  Return to file: sour16.asm
 
@@ -28,7 +129,7 @@
 
 .1100					Sour16RootCommandSet:
 .1100					Command_Miscellaneous:
-.1100	80 de		bra $10e0			bra 	MiscellaneousHandler
+.1100	80 f5		bra $10f7			bra 	MiscellaneousHandler
 >1102							.align 	16
 .1110					Command_LoadConst:
 .1110	b1 20		lda ($20),y			lda 	(pctr),y 					; copy the first byte in
@@ -200,11 +301,21 @@
 .122b	aa		tax				tax
 .122c					S16NJmp:
 .122c	4c 00 11	jmp $1100			jmp 	Sour16RootCommandSet
-.122f					TODO:
-.122f					Implement:
-.122f					TestCode:
->122f	10 e0 10					.byte 	$10,$E0,$10
->1232	12 34 fe					.byte 	$12,$34,$FE
->1235	e2						.byte 	$E2
+
+;******  Processing file: sourextras.asm
+
+=11					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
+.122f					Multiply:
+>122f	0b						.byte 	CodeOpcode
+
+;******  Return to file: sour16.asm
+
+.1230					TODO:
+.1230					Implement:
+.1230					TestCode:
+>1230	12 01 04					.byte 	$12,$01,$04 		; R2 * R3
+>1233	13 34 02					.byte 	$13,$34,$02
+>1236	1f 02 00					.byte 	$1F,$02,$00 		; tell it R2 is low register
+>1239	09 2f 12					.byte 	$09,Multiply & $FF,Multiply >> 8
 
 ;******  End of listing
