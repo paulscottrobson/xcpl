@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Thu Jun  4 14:38:06 2020
+; Thu Jun  4 14:43:30 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -15,8 +15,17 @@
 .1003	ea		nop				nop
 .1004					StartVector:
 >1004	2f 12 00 00					.word 	TestCode,0
+
+;******  Processing file: sourmisc.asm
+
 .10e0					MiscellaneousHandler:
 >10e0	cd ab						.word 	$ABCD
+
+;******  Return to file: sour16.asm
+
+
+;******  Processing file: sourcore.asm
+
 .1100					Sour16RootCommandSet:
 .1100					Command_Miscellaneous:
 .1100	80 de		bra $10e0			bra 	MiscellaneousHandler
@@ -167,6 +176,9 @@
 .1208	1a		inc a				inc 	a
 .1209	d0 f9		bne $1204			bne 	Shift_Right
 .120b	4c 1d 12	jmp $121d			jmp 	Sour16Next
+
+;******  Return to file: sour16.asm
+
 .120e					RunProgram:
 .120e	a2 ff		ldx #$ff			ldx 	#$FF 						; reset stack
 .1210	9a		txs				txs
