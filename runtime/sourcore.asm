@@ -32,14 +32,13 @@ Command_Miscellaneous:
 		.align 	16
 
 Command_LoadConst:		;; LDI @,#
-		lda 	(pctr),y 					; copy the first byte in
+		lda 	(pctr) 						; copy the first byte in
 		sta 	Vars,X
-		iny
+		ldy 	#1
 		lda 	(pctr),y 					; copy the second byte in
+Command_UpdateHighSkip:		
 		sta 	Vars+1,X
-Command_IncYNext:		
-		iny
-		jmp 	Sour16Next
+		jmp 	Sour16NextSkip2 			; return skipping 2.
 
 ; *****************************************************************************
 ;
@@ -51,14 +50,13 @@ Command_IncYNext:
 
 Command_AddConst:		;; ADI @,#
 		clc
-		lda 	(pctr),y 					; first calculation, LSB
+		lda 	(pctr) 						; first calculation, LSB
 		adc 	Vars,X
 		sta 	Vars,X
-		iny
+		ldy 	#1
 		lda 	(pctr),y 					; second calculation, LSB
 		adc 	Vars+1,X
-		sta 	Vars+1,X
-		bra 	Command_IncYNext			; co-opt the end of load const.
+		bra 	Command_UpdateHighSkip 		; coopt Load Constant Code.
 
 ; *****************************************************************************
 ;
@@ -170,10 +168,8 @@ Command_StoreByteInd:	;; SBI @
 
 Command_LoadWordInd:	;; LWI @
 		stx 	CLWI0+1 					; set to load high byte
-
-		phy 								; load the high byte to variable
-		ldy 	#1
 CLWI0:		
+		ldy 	#1
 		lda 	($00),y 					; read the high byte.
 		tay 								; put it in Y temporarily.
 		bra 	CLBIEntrance 				; and do the low code
@@ -187,7 +183,6 @@ CLWI0:
 		.align 	16
 
 Command_LoadByteInd:	;; LBI @
-		phy  								; save Y
 		ldy 	#0 							; zero high byte value.
 		;
 		;		Entering here, Y contains the loaded MSB/zero and Y pos is stacked.
@@ -198,7 +193,6 @@ CLBI0:
 		lda 	($00) 						; read the low byte.
 		sta 	Vars,x 						; save it into the variable.
 		sty 	Vars+1,x
-		ply 								; restore Y
 		jmp 	Sour16Next
 
 ; *****************************************************************************
@@ -226,23 +220,19 @@ Shift_None:
 		.align 	16
 
 Command_LoadWordDirect: ;; LDR @,#
-		lda 	(pctr),y 					; copy address to temp0
-		iny
+		lda 	(pctr) 						; copy address to temp0
 		sta 	temp0
+		ldy 	#1
 		lda 	(pctr),y
-		iny
 		sta 	temp0+1
 		;
 		lda 	(temp0) 					; read LSB
 		sta 	Vars,x
 		;
-		phy 								; read MSB
-		ldy 	#1
-		lda 	(temp0),y
+		lda 	(temp0),y 					; read and save MSB
 		sta 	Vars+1,x
-		ply
-
-		jmp 	Sour16Next
+		;
+		jmp 	Sour16NextSkip2
 
 ; *****************************************************************************
 ;
@@ -256,10 +246,8 @@ Command_StoreIndirectAdvance: ;; SIA @
 		lda 	Vars,X 						; get LSB and write out
 		sta 	(Vars) 						; to R0
 		lda 	Vars+1,X 					; get MSB
-		phy 								; save program pos
 		ldy 	#1 							; write MSB
 		sta 	(Vars),y
-		ply 								; restore program position
 		clc
 		lda 	Vars 						; bump by 2
 		adc 	#2
@@ -267,7 +255,7 @@ Command_StoreIndirectAdvance: ;; SIA @
 		bcc 	CSIANoCarry 				; carry to MSB
 		inc 	Vars+1
 CSIANoCarry:		
-		jmp 	Sour16Next
+		jmp 	Sour16NextSkip2
 
 ; *****************************************************************************
 ;

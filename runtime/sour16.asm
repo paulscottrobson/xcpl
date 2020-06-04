@@ -11,7 +11,7 @@
 ; *****************************************************************************
 ; *****************************************************************************
 
-		* = $00
+		* = $08
 
 Vars:	.fill 	16*2 						; registers in low/high byte pairs
 pctr:	.fill 	2							; address of current routine.
@@ -33,74 +33,15 @@ StartVector:								; +4 is the start of the Sour16 code.
 
 		.include 	"sourmisc.asm"			; miscellaneous functions.
 		.include 	"sourcore.asm"			; core operations
+		.include 	"sourrun.asm" 			; main execution functions
+		.include	"sourextras.asm" 		; extra functionality
 
-; *****************************************************************************
-;
-;							Run main program
-;
-; *****************************************************************************
 
-RunProgram:
-		ldx 	#$FF 						; reset stack
-		txs
-		lda 	StartVector 				; load the initial program counter value.
-		sta 	pctr
-		lda 	StartVector+1
-		sta 	pctr+1
-		ldy 	#0
-
-; *****************************************************************************
-;
-;					Return here to execute next command
-;
-; *****************************************************************************
-
-Sour16Next:
-		.byte 	$FF
-		lda 	(pctr),y 					; get the opcode 
-		iny 								; skip the opcode.
-		tax 								; save in X
-		and 	#$F0
-		sta 	S16NJmp+1 					; modify the jump address
-		txa 			 					; get the opcode back from X
-		and 	#15 						; index into the register block.
-		asl 	a 							; (reg# x 2) is also in A. 
-		tax
-S16NJmp:
-		jmp 	Sour16RootCommandSet
-
-		.include	"sourextras.asm"
-
-; 	0x Miscellaneous
-;			jsr ret tests and branches code caller
-
-;	1x Load Constant
-;	2x Add Constant
-; 	3x Add Register
-; 	4x Sub Register
-; 	5x And Register
-; 	6x Or Register
-; 	7x Xor Register
-;	8x Store byte indirect
-; 	9x Load Word Indirect
-; 	Ax Load Byte Indirect
-; 	Bx Shift bidirectional.
-; 	Cx Load Direct
-;	Dx Unused (at present)
-; 	Ex Store Word Indirect Advance 
-;	Fx Unused (at present)
 
 TODO:
 
 Implement:
-; 	* External Multiply, Divide, Negate.
-
-TestCode:
-		.byte 	$12,$01,$04 		; R2 * R3
-		.byte 	$13,$34,$02
-		.byte 	$1F,$02,$00 		; tell it R2 is low register
-		.byte 	$09,Multiply & $FF,Multiply >> 8
-
+; 	* External Divide, Modulus, Negate.
 
 
 ; Expr returns : Reference, Calculated value, Constant (one only), Test Result.

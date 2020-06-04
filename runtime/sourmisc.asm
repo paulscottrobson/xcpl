@@ -63,32 +63,44 @@ BranchZero:				;; BZERO
 		lda 	TestVariable		
 		ora 	TestVariable+1
 		beq 	BranchTrue
-BranchFalse:
-		iny
-		jmp 	Sour16Next
-
+		bra 	BranchFalse
 
 		.align 	16
 BranchNonZero:			;; BNONZERO
 		lda 	TestVariable		
 		ora 	TestVariable+1
-		beq 	BranchFalse
-BranchTrue:
-		lda 	(pctr),y
-		tay	
-		jmp 	Sour16Next
+		bne 	BranchTrue
+		bra 	BranchFalse
 
 		.align 	16
 BranchMinus:			;; BMINUS
 		lda 	TestVariable+1	
 		bmi 	BranchTrue
-		bra 	BranchFalse
+BranchFalse:
+		inc 	pctr
+		bcc 	BranchFalseNoCarry
+		inc 	pctr+1
+BranchFalseNoCarry:
+		jmp 	Sour16Next
 
 		.align 	16
 BranchPlus:				;; BPLUS
 		lda 	TestVariable+1	
-		bmi 	BranchTrue
-		bra 	BranchFalse
+		bmi 	BranchFalse
+BranchTrue:		
+		ldx 	#0 							; X is the sign extended offset
+		lda 	(pctr) 						; get offset
+		bpl 	BTPositive
+		dex 								; if -ve make sign extended 255
+BTPositive:
+		clc 								; add to PCTR
+		adc 	pctr 
+		sta 	pctr
+		;
+		txa 
+		adc 	pctr+1
+		sta 	pctr+1
+		jmp 	Sour16Next
 
 ; *****************************************************************************
 ;
@@ -98,18 +110,16 @@ BranchPlus:				;; BPLUS
 
 		.align 	16
 CallSubroutine: 		;; CALL #
-		phy 								; save offset before incrementing
 		lda 	pctr+1 						; save PCTR Hi
 		pha
 		lda 	pctr 						; save PCTR Lo
 		pha
-		lda 	(pctr),y 					; read new PC low into X
+		lda 	(pctr) 						; read new PC low into X
 		tax
-		iny
+		ldy 	#1
 		lda 	(pctr),y 					; read new PC high into A
 		sta 	pctr+1 						; update address
 		stx 	pctr
-		ldy 	#0 							; start of that routine
 		jmp 	Sour16Next 					; and execute from there.
 
 
@@ -124,16 +134,9 @@ CallSubroutine: 		;; CALL #
 
 		.align 	16
 CallMachineCode:
-		tya 								; work it out make PCTR the actual address
-		clc
-		adc 	pctr
-		sta 	pctr
-		bcc 	CMCNoCarry
-		inc 	pctr+1
-CMCNoCarry:
 		lda 	#Vars 						; address of variables in A
 		jsr 	MachineCodeCaller 			; call the calling code.
-		nop 								; and fall through to return.
+		bra 	ReturnSubroutine 			; and do the return code.
 
 ; *****************************************************************************
 ;
@@ -147,10 +150,7 @@ ReturnSubroutine:
 		sta 	pctr
 		pla 			
 		sta 	pctr+1
-		ply 								; restore offset
-		iny 								; skip over the call address
-		iny
-		jmp 	Sour16Next
+		jmp 	Sour16NextSkip2 			; return, skipping the code.
 
 ; *****************************************************************************
 ;
