@@ -38,12 +38,6 @@ StartVector:								; +4 is the start of the Sour16 code.
 
 Sour16End:
 
-TODO:
-
-Implement:
-; 	* External Divide, Modulus, Negate.
-
-
 ; Expr returns : Reference, Calculated value, Constant (one only), Test Result.
 ; Code passes base address of registers in A.
 

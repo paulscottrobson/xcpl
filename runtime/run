@@ -1,3 +1,0 @@
-#!/bin/bash
-./build
-../bin/x16emu -debug -scale 2 -prg sour16.prg -run

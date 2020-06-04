@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Thu Jun  4 20:01:36 2020
+; Thu Jun 04 23:14:53 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -304,10 +304,10 @@
 .1239	4c 00 11	jmp $1100			jmp 	Sour16RootCommandSet
 >123c							.align 	256
 .1300					TestCode:
->1300	12 0d 04					.byte 	$12,13,4 		; R2 * R3
->1303	13 0c 07					.byte 	$13,12,7
+>1300	12 69 00					.byte 	$12,105,0 		; R2 / R3
+>1303	13 0a 00					.byte 	$13,10,0
 >1306	1f 02 00					.byte 	$1F,$02,$00 		; tell it R2 is low register
->1309	0a 0c 13					.byte 	$0A,Multiply & $FF,Multiply >> 8
+>1309	0a 5c 13					.byte 	$0A,Modulus & $FF,Modulus	 >> 8
 
 ;******  Return to file: sour16.asm
 
@@ -317,44 +317,105 @@
 =12					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
 .130c					Multiply:
 >130c	0c						.byte 	CodeOpcode
->130d	ff						.byte 	$FF
-.130e	aa		tax				tax 								; save Base in X.
-.130f	18		clc				clc
-.1310	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
-.1312	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
-.1314	aa		tax				tax
-.1315	64 2a		stz $2a				stz 	temp0 						; clear result
-.1317	64 2b		stz $2b				stz 	temp0+1
-.1319					_MultLoop:
-.1319	b5 00		lda $00,x			lda 	0,X 						; check LSB of lower byte
-.131b	29 01		and #$01			and 	#1
-.131d	f0 0d		beq $132c			beq 	_MultNoAdd
-.131f	18		clc				clc 								; add in.
-.1320	a5 2a		lda $2a				lda 	temp0
-.1322	75 02		adc $02,x			adc 	2,x
-.1324	85 2a		sta $2a				sta 	temp0
-.1326	a5 2b		lda $2b				lda 	temp0+1
-.1328	75 03		adc $03,x			adc 	3,x
-.132a	85 2b		sta $2b				sta 	temp0+1
-.132c					_MultNoAdd:
-.132c	56 01		lsr $01,x			lsr 	1,x 						; shift one right and one left
-.132e	76 00		ror $00,x			ror 	0,x
-.1330	16 02		asl $02,x			asl 	2,x
-.1332	36 03		rol $03,x			rol 	3,x
-.1334	b5 00		lda $00,x			lda 	0,x 						; check if done
-.1336	15 01		ora $01,x			ora 	1,x
-.1338	d0 df		bne $1319			bne 	_MultLoop
-.133a	a5 2a		lda $2a				lda 	temp0 						; copy result back.
-.133c	95 00		sta $00,x			sta 	0,x
-.133e	a5 2b		lda $2b				lda 	temp0+1
-.1340	95 01		sta $01,x			sta 	1,x
->1342	ff						.byte 	$FF
-.1343	60		rts				rts
+.130d	aa		tax				tax 								; save Base in X.
+.130e	18		clc				clc
+.130f	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.1311	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1313	aa		tax				tax
+.1314	64 2a		stz $2a				stz 	temp0 						; clear result
+.1316	64 2b		stz $2b				stz 	temp0+1
+.1318					_MultLoop:
+.1318	b5 00		lda $00,x			lda 	0,X 						; check LSB of lower byte
+.131a	29 01		and #$01			and 	#1
+.131c	f0 0d		beq $132b			beq 	_MultNoAdd
+.131e	18		clc				clc 								; add in.
+.131f	a5 2a		lda $2a				lda 	temp0
+.1321	75 02		adc $02,x			adc 	2,x
+.1323	85 2a		sta $2a				sta 	temp0
+.1325	a5 2b		lda $2b				lda 	temp0+1
+.1327	75 03		adc $03,x			adc 	3,x
+.1329	85 2b		sta $2b				sta 	temp0+1
+.132b					_MultNoAdd:
+.132b	56 01		lsr $01,x			lsr 	1,x 						; shift one right and one left
+.132d	76 00		ror $00,x			ror 	0,x
+.132f	16 02		asl $02,x			asl 	2,x
+.1331	36 03		rol $03,x			rol 	3,x
+.1333	b5 00		lda $00,x			lda 	0,x 						; check if done
+.1335	15 01		ora $01,x			ora 	1,x
+.1337	d0 df		bne $1318			bne 	_MultLoop
+.1339	a5 2a		lda $2a				lda 	temp0 						; copy result back.
+.133b	95 00		sta $00,x			sta 	0,x
+.133d	a5 2b		lda $2b				lda 	temp0+1
+.133f	95 01		sta $01,x			sta 	1,x
+.1341	60		rts				rts
+.1342					Negate:
+>1342	0c						.byte 	CodeOpcode
+.1343	aa		tax				tax 								; save Base in X.
+.1344	18		clc				clc
+.1345	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.1347	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1349	aa		tax				tax
+.134a	38		sec				sec
+.134b	a9 00		lda #$00			lda 	#0
+.134d	f5 00		sbc $00,x			sbc 	0,x
+.134f	95 00		sta $00,x			sta 	0,x
+.1351	a9 00		lda #$00			lda 	#0
+.1353	f5 01		sbc $01,x			sbc 	1,x
+.1355	95 01		sta $01,x			sta 	1,x
+.1357	60		rts				rts
+.1358					Divide:
+>1358	0c						.byte 	CodeOpcode
+.1359	38		sec				sec
+.135a	80 02		bra $135e			bra 	DivideModulus
+.135c					Modulus:
+>135c	0c						.byte 	CodeOpcode
+.135d	18		clc				clc
+.135e					DivideModulus:
+.135e	08		php				php
+.135f	aa		tax				tax 								; save Base in X.
+.1360	18		clc				clc
+.1361	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.1363	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1365	aa		tax				tax
+.1366	5a		phy				phy 								; Y is the iteration counter
+.1367	a0 10		ldy #$10			ldy 	#16
+.1369	64 2a		stz $2a				stz 	temp0 						; zero A
+.136b	64 2b		stz $2b				stz 	temp0+1
+.136d					_DivideLoop:
+.136d	16 00		asl $00,x			asl 	0,x 						; shift AQ left
+.136f	36 01		rol $01,x			rol 	1,x
+.1371	26 2a		rol $2a				rol 	temp0
+.1373	26 2b		rol $2b				rol 	temp0+1
+.1375	38		sec				sec
+.1376	a5 2a		lda $2a				lda 	temp0 						; do A-M calculation
+.1378	f5 02		sbc $02,x			sbc 	2,x
+.137a	48		pha				pha 								; saved on stack
+.137b	a5 2b		lda $2b				lda 	temp0+1
+.137d	f5 03		sbc $03,x			sbc 	3,x
+.137f	90 09		bcc $138a			bcc 	_DivideNoAdd
+.1381	85 2b		sta $2b				sta 	temp0+1 					; A-M >= 0
+.1383	68		pla				pla 								; so save the subtraction
+.1384	85 2a		sta $2a				sta 	temp0
+.1386	f6 00		inc $00,x			inc		0,x 						; set the LSB
+.1388	80 01		bra $138b			bra 	_DivideNext
+.138a					_DivideNoAdd:
+.138a	68		pla				pla 								; throw the interim result
+.138b					_DivideNext:
+.138b	88		dey				dey 								; do the correct number of iterations
+.138c	d0 df		bne $136d			bne 	_DivideLoop
+.138e	7a		ply				ply 								; restore Y
+.138f	28		plp				plp 								; return div (CS) mod (CC)
+.1390	b0 08		bcs $139a			bcs 	_DivideExit
+.1392	a5 2a		lda $2a				lda 	temp0
+.1394	95 00		sta $00,x			sta 	0,x
+.1396	a5 2b		lda $2b				lda 	temp0+1
+.1398	95 01		sta $01,x			sta 	1,x
+.139a					_DivideExit:
+>139a	ff						.byte	$FF
+.139b	60		rts				rts
 
 ;******  Return to file: sour16.asm
 
-.1344					Sour16End:
-.1344					TODO:
-.1344					Implement:
+.139c					Sour16End:
 
 ;******  End of listing

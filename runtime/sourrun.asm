@@ -56,9 +56,9 @@ S16NJmp:
 
 		.align 	256
 TestCode:
-		.byte 	$12,13,4 		; R2 * R3
-		.byte 	$13,12,7
+		.byte 	$12,105,0 		; R2 / R3
+		.byte 	$13,10,0
 		.byte 	$1F,$02,$00 		; tell it R2 is low register
-		.byte 	$0A,Multiply & $FF,Multiply >> 8
+		.byte 	$0A,Modulus & $FF,Modulus	 >> 8
 
 
