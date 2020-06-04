@@ -34,6 +34,7 @@ ReturnSubroutine= $10d0
 TestPlus	= $1040
 Sour16Base	= $1000
 BranchZero	= $1050
+Sour16End	= $1344
 Shift_Left	= $11f8
 Command_Shift	= $11b0
 Command_SubRegister= $1140

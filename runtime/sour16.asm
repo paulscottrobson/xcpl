@@ -36,7 +36,7 @@ StartVector:								; +4 is the start of the Sour16 code.
 		.include 	"sourrun.asm" 			; main execution functions
 		.include	"sourextras.asm" 		; extra functionality
 
-
+Sour16End:
 
 TODO:
 

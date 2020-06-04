@@ -41,18 +41,29 @@ for k in keywords:
 #
 constants = {}
 for k in keywords.keys():
-	code = (labels[keywords[k]] - labels["Sour16Base"])
+	code = labels[keywords[k]]-labels["Sour16Base"]
 	if k.startswith("["):
-		constants[k] = code
+		constants[k] = labels[keywords[k]]
 	else:
 		constants[k.split()[0]] = (code & 0xF0) if code >= 256 else (code >> 4)
+constants["loadaddr"] = labels["Sour16Base"]
+constants["endaddr"] = labels["Sour16End"]
+#
+#		Load the runtime as a binary
+#
+runTime = bytes(open("sour16.prg","rb").read(-1))[2:]
+#
+#		Output as a Python class.
+#
 keys = [x for x in constants.keys()]
 keys.sort(key = lambda x:constants[x])
-#
 h = open("sour16.py","w")
 h.write("#\n#\tAutomatically generated.\n#\n")
-h.write("class Sour16(object):\n")
+h.write("class Sour16(object):\n\tpass\n\n")
 for k in keys:
 	s = "X_"+k[1:-1] if k.startswith("[") else k
-	h.write("Sour16.{0} = ${1:04x}\n".format(s.upper(),constants[k]))
+	if k == "loadaddr":
+		h.write("\n")
+	h.write("Sour16.{0} = 0x{1:02x}\n".format(s.upper(),constants[k]))
+h.write("\nSour16.RUNTIME = [ {0} ]\n".format(",".join(["0x{0:02x}".format(c) for c in runTime])))
 h.close()
