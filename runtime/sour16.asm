@@ -3,6 +3,7 @@
 ;
 ;		Name:		sour16.asm
 ;		Purpose:	Sour16 is the XCPL Runtime
+;					It borrows some ideas, not code, from Apple ][ Sweet 16.
 ;		Date: 		4th June 2020
 ;		Author:		Paul Robson (paul@robsons.org.uk)
 ;
@@ -11,9 +12,8 @@
 
 		* = $00
 
-Vars:	.fill 	16*2
-temp0:	.fill 	2
-pctr:	.fill 	2
+Vars:	.fill 	16*2 						; registers in low/high byte pairs
+pctr:	.fill 	2							; address of current routine.
 
 ; *****************************************************************************
 ;
@@ -22,10 +22,19 @@ pctr:	.fill 	2
 ; *****************************************************************************
 
 		* = 	$1000
-Sour16Base:		
-		lda 	#TestCode & $FF
+Sour16Base:		 							; starts with jump to run code/
+		jmp 	RunProgram
+		nop
+
+StartVector:								; +4 is the start of the Sour16 code.
+		.word 	TestCode,0 					
+
+RunProgram:
+		ldx 	#$FF 						; reset stack
+		txs
+		lda 	StartVector 				; load the initial program counter value.
 		sta 	pctr
-		lda 	#TestCode >> 8
+		lda 	StartVector+1
 		sta 	pctr+1
 		ldy 	#0
 
@@ -46,6 +55,9 @@ S16NJmp:
 ;
 ;	jsr ret word->byte tests and branches code caller
 ;
+		* = $10F0
+MiscellaneousHandler:
+		.word 	$ABCD
 
 ; *****************************************************************************
 ;
@@ -56,24 +68,15 @@ S16NJmp:
 		* = Sour16Base+$100
 
 Sour16RootCommandSet:
-		nop
-		.align 	16
-		nop
-		.align 	16
-		nop
-		.align 	16
-		nop
-		.align 	16
-		nop
-		.align 	16
-		nop
-		.align 	16
-		nop
-		.align 	16
-		nop
-		.align 	16
-		nop
 
+; *****************************************************************************
+;
+;							Handle Miscellaneous Opcodes
+;
+; *****************************************************************************
+
+Command_Miscellaneous:
+		bra 	MiscellaneousHandler
 
 ; *****************************************************************************
 ;
@@ -112,18 +115,114 @@ Command_AddConst:		;; ADI @,#
 		sta 	Vars+1,X
 		bra 	Command_IncYNext			; co-opt the end of load const.
 
-;	*00 	  Misc 
-;	*01-04 4 x Arithmetic 
-;	*05-07 3 x Logical
-;	*08 Save Byte Indirect
-;	09 Load Constant
-;	0A Add Constant
-; 	0B Load Direct
-;	0D Store Word Indirect
-;	0F Load Word Indirect 
+; *****************************************************************************
+;
+;						Add Next Register to Register
+;
+; *****************************************************************************
 
+		.align 	16
+
+Command_AddRegister:	;; ADD @
+		clc
+		lda 	Vars,x
+		adc 	Vars+2,x
+		sta		Vars,x
+		lda 	Vars+1,x
+		adc 	Vars+3,x
+		sta		Vars+1,x
+		jmp 	Sour16Next
+
+; *****************************************************************************
+;
+;						Sub Next Register from Register
+;
+; *****************************************************************************
+
+		.align 	16
+
+Command_SubRegister:	;; SUB @
+		sec
+		lda 	Vars,x
+		sbc 	Vars+2,x
+		sta		Vars,x
+		lda 	Vars+1,x
+		sbc 	Vars+3,x
+		sta		Vars+1,x
+		jmp 	Sour16Next
+
+; *****************************************************************************
+;
+;						And Next Register into Register
+;
+; *****************************************************************************
+
+		.align 	16
+
+Command_AndRegister:	;; AND @
+		lda 	Vars,x
+		and 	Vars+2,x
+		sta		Vars,x
+		lda 	Vars+1,x
+		and 	Vars+3,x
+		sta		Vars+1,x
+		jmp 	Sour16Next
+
+; *****************************************************************************
+;
+;						Or Next Register into Register
+;
+; *****************************************************************************
+
+		.align 	16
+
+Command_OrRegister:	;; ORR @
+		lda 	Vars,x
+		ora 	Vars+2,x
+		sta		Vars,x
+		lda 	Vars+1,x
+		ora 	Vars+3,x
+		sta		Vars+1,x
+		jmp 	Sour16Next
+
+; *****************************************************************************
+;
+;						Xor Next Register into Register
+;
+; *****************************************************************************
+
+		.align 	16
+
+Command_XorRegister:	;; XOR @
+		lda 	Vars,x
+		eor 	Vars+2,x
+		sta		Vars,x
+		lda 	Vars+1,x
+		eor 	Vars+3,x
+		sta		Vars+1,x
+		jmp 	Sour16Next
+
+; 	00 Miscellaneous
+;	01 Load Constant
+;	02 Add Constant
+; 	03 Add Register
+; 	04 Sub Register
+; 	05 And Register
+; 	06 Or Register
+; 	07 Xor Register
+
+;	* Save Byte Indirect
+; 	* Load Direct
+;	* Store Word Indirect
+;	* Load Word Indirect 
+;	* Bidirectional shift.
+;	*   Misc 
+; 	* External Multiply, Divide, Negate.
 
 TestCode:
-		.byte 	$92,$09,$47
-		.byte 	$A2,$FE,$01
-		.byte 	$A0,$FF,$FF
+		.byte 	$12,$09,$47
+		.byte 	$13,$FE,$FF
+		.byte 	$42
+
+; Expr returns : Reference, Calculated value, Constant (one only), Test Result.
+; Code passes base address of registers in A.
