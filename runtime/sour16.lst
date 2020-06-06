@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Sat Jun 06 12:22:52 2020
+; Sat Jun 06 17:17:12 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -80,7 +80,7 @@
 >1086							.align 	16
 .1090					BranchTrue:
 .1090	a2 00		ldx #$00			ldx 	#0 							; X is the sign extended offset
-.1092	b2 28		lda ($28)			lda 	(pctr) 						; get offset
+.1092	b2 28		lda ($28)			lda 	(pctr) 						; get offset, this is from the offset itself.
 .1094	10 01		bpl $1097			bpl 	BTPositive
 .1096	ca		dex				dex 								; if -ve make sign extended 255
 .1097					BTPositive:

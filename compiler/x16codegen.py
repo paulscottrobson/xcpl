@@ -29,7 +29,8 @@ class X16CodeGen(object):
 		self._setupMemoryUsage(uninitSize,initSize)
 		self.codeStart = self.codePtr
 	#
-	#		
+	#		Sets up how memory is allocated for this specific machine. This simply
+	#		puts the initialised data, then the uninitialised, then the code.		
 	#
 	def _setupMemoryUsage(self,uninitSize,initSize):
 		#
@@ -81,6 +82,7 @@ class X16CodeGen(object):
 	#		Instruction writers.
 	#
 	def assemble(self,opcode,operandSize = 0,operand = None):
+		addr = self.codePtr
 		self.write(self.codePtr,opcode) 										# write to memory
 		if operandSize >= 1:
 			self.write(self.codePtr+1,operand & 0xFF)
@@ -99,7 +101,10 @@ class X16CodeGen(object):
 			print("{0:04x} : {1:10} : {2:8} {3}".format(self.codePtr,s,c[0],c[1]))
 		#
 		self.codePtr += (operandSize + 1)										# advance code pointer
-
+		if self.codePtr >= self.codeLimit:
+			raise XCPLException("Out of program memory.")
+		return addr 
+		
 if __name__ == "__main__":
 	cg = X16CodeGen(1024,1024)
 	cg.assemble(16,2,32765)

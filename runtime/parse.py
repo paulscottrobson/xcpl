@@ -56,7 +56,7 @@ constants["loadaddr"] = labels["Sour16Base"]
 #
 runTime = bytes(open("sour16.prg","rb").read(-1))[2:]
 #
-#		Output as a Python class.
+#		Output Runtime a Python class.
 #
 keys = [x for x in constants.keys()]
 keys.sort(key = lambda x:constants[x])
@@ -70,7 +70,50 @@ for k in keys:
 	h.write("Sour16.{0} = 0x{1:02x}\n".format(s.upper(),constants[k]))
 
 h.write("\nSour16.DECODE = {0}\n".format(str(disasm)))
-
 h.write("\nSour16.RUNTIME = [ {0} ]\n".format(",".join(["0x{0:02x}".format(c) for c in runTime])))
+h.close()
+#
+#		Create the code Generator wrapper class
+#
+h = open("codegen.py","w")
+h.write("#\n#\tAutomatically generated wrapper class for code generator.\n#\n")
+h.write("class CodeGen(object):\n")
+h.write("\tdef __init__(self,codeGen):\n")
+h.write("\t\tself.cg = codeGen\n")
+#
+#		These are methods exported from the Code Generator.
+#
+export = """
+	def allocUninitialised(self,size):
+	def writeDataMemory(self,data):
+	def setExecuteAddress(self,address):
+	def write(self,address,data):
+	def assemble(self,opcode,operandSize = 0,operand = None)
+""".strip().split(":")
 
+for d in [x.strip() for x in export if x.strip() != ""]:
+	m = re.match("^def\\s*(.*?)\\((.*?)\\)$",d)
+	p = [x.split("=")[0].strip() for x in m.group(2).split(",")]
+	assert m is not None
+	h.write("\t{0}:\n".format(d))
+	h.write("\t\treturn self.cg.{0}({1})\n".format(m.group(1),",".join(p[1:])))
+
+for k in disasm.keys():
+	parameters = []
+	mnemonic = disasm[k]
+	paramCount = 0
+	opcode = "0x{0:02x}".format(k)
+	if mnemonic.find("@") >= 0:
+		parameters.append("reg")
+		opcode = opcode + "+reg"
+	if mnemonic.find("+") >= 0:
+		paramCount = 1
+		parameters.append("operand")		
+	if mnemonic.find("#") >= 0:
+		parameters.append("operand")
+		paramCount = 2
+	h.write("\tdef c_{0}(self,{1}):\n".format(mnemonic.split()[0],",".join(parameters)))
+	h.write("\t\treturn self.cg.assemble({0},{1}{2})\n".format(opcode,paramCount,"" if paramCount == 0 else ",operand"))
+
+h.write("\t")
 h.close()
