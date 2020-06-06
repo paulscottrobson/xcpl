@@ -42,6 +42,8 @@ class TermCompiler(object):
 	#
 	def compile(self,stream,regLevel,expressionCompiler):
 		t = stream.get()														# get the term.
+		if t == "":
+			raise XCPLException("Missing term")
 		#
 		#		Integer constant
 		#

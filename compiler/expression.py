@@ -33,8 +33,53 @@ class ExpressionCompiler(object):
 	#		Does not convert to a final value.
 	#
 	def compile(self,stream,regLevel,termCompiler):
-		firstTerm = stream.get()
-		return [0,0]
+		return self.compileAtPrecedenceLevel(0,stream,regLevel,termCompiler)
+	#
+	def compileAtPrecedenceLevel(self,precedence,stream,regLevel,termCompiler):
+		current = termCompiler.compile(stream,regLevel,self)
+		operator = stream.get()
+		while operator in ExpressionCompiler.OPERATORS and ExpressionCompiler.OPERATORS[operator] > precedence:
+			rightSide = self.compileAtPrecedenceLevel(ExpressionCompiler.OPERATORS[operator],stream,regLevel+1,termCompiler)
+			current = self.doBinaryCalculation(current,operator,rightSide,regLevel,termCompiler)
+			operator = stream.get()
+		stream.put(operator)
+		return current
+	#
+	#		Perform a binary operation.
+	#
+	def doBinaryCalculation(self,current,operator,rightSide,regLevel,termCompiler):
+		#
+		#		Try short cuts - numeric constants, adding/sub constants, shifts for multiply.
+		#
+		optimise = self.optimiseCalculation(current,operator,rightSide,regLevel,termCompiler)
+		if optimise is not None:
+			return optimise
+		#
+		#		Cannot short cut, so convert the left and right to values
+		#
+		termCompiler.convertToValue(current,regLevel)
+		termCompiler.convertToValue(rightSide,regLevel+1)
+		#
+		#		Generate the appropriate code and return the value. There are four types here
+		#			(i) 	those supported by the opcodes directly (+ - & | ^ <<)
+		#			(ii) 	those supported by utility functions (* / %)
+		#			(iii)	conditions.
+		#			(iv) 	those with special code (>>)
+		#
+		# BODGE FOR TESTING
+		if operator == "-":
+			self.cg.c_sub(regLevel)  
+		elif operator == "+":
+			self.cg.c_add(regLevel)  
+		elif operator == "&":
+			self.cg.c_and(regLevel)  
+
+		return [VType.VALUE]
+	#
+	#		Short cut calculations.
+	#
+	def optimiseCalculation(self,current,operator,rightSide,regLevel,termCompiler):
+		return None
 	#
 	#		Test routine. 
 	#
@@ -43,11 +88,11 @@ class ExpressionCompiler(object):
 		stream.put(s)
 		print("\n*********** "+s+" ***********")
 		self.cg.setListHandle()							
-		r = self.compile(stream,2,termCompiler)				
+		r = self.compile(stream,1,termCompiler)				
 		print("\nReturns [VType.{0}{1}]".format(VType.TOSTRING[r[0]],
 								",${0:04x}".format(r[1]) if len(r) == 2 else ""))
 		print("Complete-->")
-		termCompiler.convertToValue(r,2)
+		termCompiler.convertToValue(r,1)
 #
 #		This is the precedence level of the operators.
 #
@@ -66,9 +111,9 @@ if __name__ == "__main__":
 	ec = ExpressionCompiler(codeGen,idStore)
 
 	src = """
-		42
-		count
-		""
+		1-(2+3)+4
+		a&b+c-d
+		count+1
 	""".strip().split("\n")
 
 	stream = TextParser(src)
