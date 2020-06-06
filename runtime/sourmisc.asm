@@ -92,7 +92,7 @@ BranchPlus:				;; BRPLUS +
 		.align 	16
 BranchTrue:		;; BR +
 		ldx 	#0 							; X is the sign extended offset
-		lda 	(pctr) 						; get offset
+		lda 	(pctr) 						; get offset, this is from the offset itself.
 		bpl 	BTPositive
 		dex 								; if -ve make sign extended 255
 BTPositive:

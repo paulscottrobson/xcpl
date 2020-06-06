@@ -1,8 +1,7 @@
 Process:
 
-- Code handler / code generator / support routines 
-- (autogen superclass ?)
-- Terms - get code actually running.
+- Autogen wrapper class
+- Terms - get code actually running
 - Expressions
 - Assignment 
 - Command groups
