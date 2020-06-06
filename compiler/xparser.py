@@ -26,7 +26,7 @@ class TextParser(object):
 		self.charStack = ""
 		self.tokenStack = []
 		XCPLException.LINE = 1
-		self.doublePunct = { ">=":0, "<=":0, "<>":0 }						# Two char punc tokens.
+		self.doublePunct = { ">=":0,"<=":0,"<>":0,"==":0,"<<":0,">>":0  }	# Two char punc tokens.
 	#
 	#		Get a character from the stream
 	#

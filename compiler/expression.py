@@ -30,8 +30,10 @@ class ExpressionCompiler(object):
 		self.identStore = identStore
 	#
 	#		Compile an expression at the given level from the given stream.
+	#		Does not convert to a final value.
 	#
 	def compile(self,stream,regLevel,termCompiler):
+		firstTerm = stream.get()
 		return [0,0]
 	#
 	#		Test routine. 
@@ -46,6 +48,16 @@ class ExpressionCompiler(object):
 								",${0:04x}".format(r[1]) if len(r) == 2 else ""))
 		print("Complete-->")
 		termCompiler.convertToValue(r,2)
+#
+#		This is the precedence level of the operators.
+#
+ExpressionCompiler.OPERATORS = {
+	"&":1,	"|":1,	"^":1,
+	"<":2,	"<=":2,	">":2,	">=":2,	"==":2,	"<>":2,
+	"+":3,	"-":3,
+	"*":4,	"/":4,	">>":4,	"<<":4,
+	"!":5,	"?":5
+}
 
 if __name__ == "__main__":
 	codeGen = CodeGen(X16CodeGen(1024,1024))		
@@ -53,8 +65,12 @@ if __name__ == "__main__":
 	tc = TermCompiler(codeGen,idStore)				
 	ec = ExpressionCompiler(codeGen,idStore)
 
-	stream = TextParser("""
+	src = """
 		42
-	""".split("\n"))
-	for i in range(0,1):
+		count
+		""
+	""".strip().split("\n")
+
+	stream = TextParser(src)
+	for i in range(0,len(src)):
 		ec.test(stream,tc)

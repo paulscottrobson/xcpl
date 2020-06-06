@@ -56,6 +56,9 @@ class TestIdentStore(IdentStore):
 	def __init__(self):
 		IdentStore.__init__(self)
 		self.set(True,"a",0xAA)
+		self.set(True,"b",0xBB)
+		self.set(True,"c",0xCC)
+		self.set(True,"d",0xDD)
 		self.set(True,"minus1",-1)
 		self.set(False,"count",100)
 		self.set(False,"star",0x2A)
