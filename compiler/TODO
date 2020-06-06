@@ -1,0 +1,14 @@
+Process:
+
+- Identifier store with test creator.
+- Code handler / code generator / support routines (autogen superclass ?)
+- Terms - get code actually running.
+- Expressions
+- Assignment 
+- Command groups
+- Conditions
+- Procedure invocation
+- Procedure definition
+- Variable definition
+
+

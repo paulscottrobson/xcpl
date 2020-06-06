@@ -59,21 +59,21 @@ TestPlus:				;; TPLUS
 ; *****************************************************************************
 
 		.align 	16
-BranchZero:				;; BZERO
+BranchZero:				;; BRZERO +
 		lda 	TestVariable		
 		ora 	TestVariable+1
 		beq 	BranchTrue
 		bra 	BranchFalse
 
 		.align 	16
-BranchNonZero:			;; BNONZERO
+BranchNonZero:			;; BRNONZERO +
 		lda 	TestVariable		
 		ora 	TestVariable+1
 		bne 	BranchTrue
 		bra 	BranchFalse
 
 		.align 	16
-BranchMinus:			;; BMINUS
+BranchMinus:			;; BRMINUS +
 		lda 	TestVariable+1	
 		bmi 	BranchTrue
 BranchFalse:
@@ -84,10 +84,13 @@ BranchFalseNoCarry:
 		jmp 	Sour16Next
 
 		.align 	16
-BranchPlus:				;; BPLUS
+BranchPlus:				;; BRPLUS +
 		lda 	TestVariable+1	
 		bmi 	BranchFalse
-BranchTrue:		
+		bra 	BranchTrue
+
+		.align 	16
+BranchTrue:		;; BR +
 		ldx 	#0 							; X is the sign extended offset
 		lda 	(pctr) 						; get offset
 		bpl 	BTPositive
@@ -145,7 +148,7 @@ CallMachineCode:
 ; *****************************************************************************
 
 		.align 	16
-ReturnSubroutine:
+ReturnSubroutine:	;; RET
 		pla 								; restore PC
 		sta 	pctr
 		pla 			

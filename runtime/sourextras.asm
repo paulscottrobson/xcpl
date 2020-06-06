@@ -151,5 +151,4 @@ _DivideNext:
 		sta 	1,x
 
 _DivideExit:		
-		.byte	$FF
 		rts				

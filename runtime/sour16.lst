@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Sat Jun  6 07:48:19 2020
+; Sat Jun 06 12:22:52 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -16,7 +16,7 @@
 .1004					StartVector:
 >1004	00 13 00 00					.word 	TestCode,0
 .1008					HighMemory:
->1008	9c 13						.word 	Sour16End
+>1008	9b 13						.word 	Sour16End
 
 ;******  Processing file: sourmisc.asm
 
@@ -54,18 +54,18 @@
 .1050					BranchZero:
 .1050	a5 0a		lda $0a				lda 	TestVariable
 .1052	05 0b		ora $0b				ora 	TestVariable+1
-.1054	f0 2e		beq $1084			beq 	BranchTrue
+.1054	f0 3a		beq $1090			beq 	BranchTrue
 .1056	80 1c		bra $1074			bra 	BranchFalse
 >1058							.align 	16
 .1060					BranchNonZero:
 .1060	a5 0a		lda $0a				lda 	TestVariable
 .1062	05 0b		ora $0b				ora 	TestVariable+1
-.1064	d0 1e		bne $1084			bne 	BranchTrue
+.1064	d0 2a		bne $1090			bne 	BranchTrue
 .1066	80 0c		bra $1074			bra 	BranchFalse
 >1068							.align 	16
 .1070					BranchMinus:
 .1070	a5 0b		lda $0b				lda 	TestVariable+1
-.1072	30 10		bmi $1084			bmi 	BranchTrue
+.1072	30 1c		bmi $1090			bmi 	BranchTrue
 .1074					BranchFalse:
 .1074	e6 28		inc $28				inc 	pctr
 .1076	90 02		bcc $107a			bcc 	BranchFalseNoCarry
@@ -76,46 +76,48 @@
 .1080					BranchPlus:
 .1080	a5 0b		lda $0b				lda 	TestVariable+1
 .1082	30 f0		bmi $1074			bmi 	BranchFalse
-.1084					BranchTrue:
-.1084	a2 00		ldx #$00			ldx 	#0 							; X is the sign extended offset
-.1086	b2 28		lda ($28)			lda 	(pctr) 						; get offset
-.1088	10 01		bpl $108b			bpl 	BTPositive
-.108a	ca		dex				dex 								; if -ve make sign extended 255
-.108b					BTPositive:
-.108b	18		clc				clc 								; add to PCTR
-.108c	65 28		adc $28				adc 	pctr
-.108e	85 28		sta $28				sta 	pctr
-.1090	8a		txa				txa
-.1091	65 29		adc $29				adc 	pctr+1
-.1093	85 29		sta $29				sta 	pctr+1
-.1095	4c 26 12	jmp $1226			jmp 	Sour16Next
->1098							.align 	16
-.10a0					CallSubroutine:
-.10a0	a5 29		lda $29				lda 	pctr+1 						; save PCTR Hi
-.10a2	48		pha				pha
-.10a3	a5 28		lda $28				lda 	pctr 						; save PCTR Lo
-.10a5	48		pha				pha
-.10a6	b2 28		lda ($28)			lda 	(pctr) 						; read new PC low into X
-.10a8	aa		tax				tax
-.10a9	a0 01		ldy #$01			ldy 	#1
-.10ab	b1 28		lda ($28),y			lda 	(pctr),y 					; read new PC high into A
-.10ad	85 29		sta $29				sta 	pctr+1 						; update address
-.10af	86 28		stx $28				stx 	pctr
-.10b1	4c 26 12	jmp $1226			jmp 	Sour16Next 					; and execute from there.
->10b4							.align 	16
-.10c0					CallMachineCode:
-.10c0	a9 08		lda #$08			lda 	#Vars 						; address of variables in A
-.10c2	20 d9 10	jsr $10d9			jsr 	MachineCodeCaller 			; call the calling code.
-.10c5	80 09		bra $10d0			bra 	ReturnSubroutine 			; and do the return code.
->10c7							.align 	16
-.10d0					ReturnSubroutine:
-.10d0	68		pla				pla 								; restore PC
-.10d1	85 28		sta $28				sta 	pctr
-.10d3	68		pla				pla
-.10d4	85 29		sta $29				sta 	pctr+1
-.10d6	4c 1b 12	jmp $121b			jmp 	Sour16NextSkip2 			; return, skipping the code.
-.10d9					MachineCodeCaller:
-.10d9	6c 28 00	jmp ($0028)			jmp 	(pctr)
+.1084	80 0a		bra $1090			bra 	BranchTrue
+>1086							.align 	16
+.1090					BranchTrue:
+.1090	a2 00		ldx #$00			ldx 	#0 							; X is the sign extended offset
+.1092	b2 28		lda ($28)			lda 	(pctr) 						; get offset
+.1094	10 01		bpl $1097			bpl 	BTPositive
+.1096	ca		dex				dex 								; if -ve make sign extended 255
+.1097					BTPositive:
+.1097	18		clc				clc 								; add to PCTR
+.1098	65 28		adc $28				adc 	pctr
+.109a	85 28		sta $28				sta 	pctr
+.109c	8a		txa				txa
+.109d	65 29		adc $29				adc 	pctr+1
+.109f	85 29		sta $29				sta 	pctr+1
+.10a1	4c 26 12	jmp $1226			jmp 	Sour16Next
+>10a4							.align 	16
+.10b0					CallSubroutine:
+.10b0	a5 29		lda $29				lda 	pctr+1 						; save PCTR Hi
+.10b2	48		pha				pha
+.10b3	a5 28		lda $28				lda 	pctr 						; save PCTR Lo
+.10b5	48		pha				pha
+.10b6	b2 28		lda ($28)			lda 	(pctr) 						; read new PC low into X
+.10b8	aa		tax				tax
+.10b9	a0 01		ldy #$01			ldy 	#1
+.10bb	b1 28		lda ($28),y			lda 	(pctr),y 					; read new PC high into A
+.10bd	85 29		sta $29				sta 	pctr+1 						; update address
+.10bf	86 28		stx $28				stx 	pctr
+.10c1	4c 26 12	jmp $1226			jmp 	Sour16Next 					; and execute from there.
+>10c4							.align 	16
+.10d0					CallMachineCode:
+.10d0	a9 08		lda #$08			lda 	#Vars 						; address of variables in A
+.10d2	20 e9 10	jsr $10e9			jsr 	MachineCodeCaller 			; call the calling code.
+.10d5	80 09		bra $10e0			bra 	ReturnSubroutine 			; and do the return code.
+>10d7							.align 	16
+.10e0					ReturnSubroutine:
+.10e0	68		pla				pla 								; restore PC
+.10e1	85 28		sta $28				sta 	pctr
+.10e3	68		pla				pla
+.10e4	85 29		sta $29				sta 	pctr+1
+.10e6	4c 1b 12	jmp $121b			jmp 	Sour16NextSkip2 			; return, skipping the code.
+.10e9					MachineCodeCaller:
+.10e9	6c 28 00	jmp ($0028)			jmp 	(pctr)
 .10f7					MiscellaneousHandler:
 .10f7	0a		asl a				asl 	a 							; on entry, 2 x the LSNibble of the word
 .10f8	0a		asl a				asl 	a 							; x 4
@@ -316,9 +318,9 @@
 
 ;******  Processing file: sourextras.asm
 
-=12					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
+=13					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
 .130c					Multiply:
->130c	0c						.byte 	CodeOpcode
+>130c	0d						.byte 	CodeOpcode
 .130d	aa		tax				tax 								; save Base in X.
 .130e	18		clc				clc
 .130f	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
@@ -351,7 +353,7 @@
 .133f	95 01		sta $01,x			sta 	1,x
 .1341	60		rts				rts
 .1342					Negate:
->1342	0c						.byte 	CodeOpcode
+>1342	0d						.byte 	CodeOpcode
 .1343	aa		tax				tax 								; save Base in X.
 .1344	18		clc				clc
 .1345	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
@@ -366,11 +368,11 @@
 .1355	95 01		sta $01,x			sta 	1,x
 .1357	60		rts				rts
 .1358					Divide:
->1358	0c						.byte 	CodeOpcode
+>1358	0d						.byte 	CodeOpcode
 .1359	38		sec				sec
 .135a	80 02		bra $135e			bra 	DivideModulus
 .135c					Modulus:
->135c	0c						.byte 	CodeOpcode
+>135c	0d						.byte 	CodeOpcode
 .135d	18		clc				clc
 .135e					DivideModulus:
 .135e	08		php				php
@@ -413,11 +415,10 @@
 .1396	a5 2b		lda $2b				lda 	temp0+1
 .1398	95 01		sta $01,x			sta 	1,x
 .139a					_DivideExit:
->139a	ff						.byte	$FF
-.139b	60		rts				rts
+.139a	60		rts				rts
 
 ;******  Return to file: sour16.asm
 
-.139c					Sour16End:
+.139b					Sour16End:
 
 ;******  End of listing
