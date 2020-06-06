@@ -2,4 +2,4 @@
 pushd ..\runtime
 call build.bat
 popd
-rem python testcg.py
+python testcg.py

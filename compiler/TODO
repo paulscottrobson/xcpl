@@ -1,7 +1,7 @@
 Process:
 
-- Terms - get code actually running
 - Expressions
+- Actually run test code.
 - Assignment 
 - Command groups
 - Conditions

@@ -48,6 +48,8 @@ VType.WORDREF = 4
 #
 VType.CONDITION = 5
 
+VType.TOSTRING = [ "Const","Value","VarRef","ByteRef","WordRef","Condition"]
+
 # *****************************************************************************
 #
 #		 Conditional value. These are ennumerated so -x inverts the test

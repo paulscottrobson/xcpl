@@ -4,6 +4,7 @@ from x16codegen import *
 #		Test program for generated code generator
 #
 cg = CodeGen(X16CodeGen(1024,1024))
+cg.setListHandle()
 cg.assemble(16,2,32765)
 cg.assemble(48,0)
 cg.assemble(8,1,-2)

@@ -1,6 +1,7 @@
 #
 #	Automatically generated wrapper class for code generator.
 #
+import sys
 class CodeGen(object):
 	def __init__(self,codeGen):
 		self.cg = codeGen
@@ -14,6 +15,8 @@ class CodeGen(object):
 		return self.cg.write(address,data)
 	def assemble(self,opcode,operandSize = 0,operand = None):
 		return self.cg.assemble(opcode,operandSize,operand)
+	def setListHandle(self,handle = sys.stdout):
+		return self.cg.setListHandle(handle)
 	def c_ldi(self,reg,operand):
 		return self.cg.assemble(0x10+reg,2,operand)
 	def c_adi(self,reg,operand):

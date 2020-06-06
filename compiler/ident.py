@@ -45,3 +45,17 @@ class IdentStore(object):
 	#
 	def clearLocals(self):
 		self.locals = {}
+
+# *****************************************************************************
+#
+#						Debugging identifier store
+#
+# *****************************************************************************
+
+class TestIdentStore(IdentStore):
+	def __init__(self):
+		IdentStore.__init__(self)
+		self.set(True,"a",0xAA)
+		self.set(True,"minus1",-1)
+		self.set(False,"count",100)
+		self.set(False,"star",0x2A)

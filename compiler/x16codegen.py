@@ -11,6 +11,7 @@
 
 from error import *
 from sour16 import *
+import sys
 
 # *****************************************************************************
 #
@@ -28,6 +29,7 @@ class X16CodeGen(object):
 		self.base = Sour16.LOADADDR 											# the load address
 		self._setupMemoryUsage(uninitSize,initSize)
 		self.codeStart = self.codePtr
+		self.listCode = None
 	#
 	#		Sets up how memory is allocated for this specific machine. This simply
 	#		puts the initialised data, then the uninitialised, then the code.		
@@ -89,11 +91,12 @@ class X16CodeGen(object):
 		if operandSize >= 2:
 			self.write(self.codePtr+2,(operand >> 8) & 0xFF)
 		#
-		if True:																# code listing.
+		if self.listCode:														# code listing.
 			operand = 0 if operand is None else operand
 			s = [ opcode, operand & 0xFF,(operand >> 8) & 0xFF ][:operandSize+1]
 			s = " ".join(["{0:02x}".format(x) for x in s])
-			c = Sour16.DECODE[opcode].replace("@","r"+str(opcode & 15)).replace("#","${0:04x}".format(operand))
+			op = opcode if (opcode & 0xF0) == (Sour16.BR & 0xF0) else (opcode & 0xF0)
+			c = Sour16.DECODE[op].replace("@","r"+str(opcode & 15)).replace("#","${0:04x}".format(operand))
 			if c.find("+"):
 				a = self.codePtr+1+(operand if (operand & 0x80) == 0 else (operand & 0xFF)-256)
 				c = c.replace("+","${0:04x}".format(a))	
@@ -104,6 +107,11 @@ class X16CodeGen(object):
 		if self.codePtr >= self.codeLimit:
 			raise XCPLException("Out of program memory.")
 		return addr 
+	#
+	#		Set the listing code handle
+	#
+	def setListHandle(self,handle = sys.stdout):
+		self.listCode = handle	
 		
 if __name__ == "__main__":
 	cg = X16CodeGen(1024,1024)

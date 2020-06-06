@@ -77,6 +77,7 @@ h.close()
 #
 h = open("codegen.py","w")
 h.write("#\n#\tAutomatically generated wrapper class for code generator.\n#\n")
+h.write("import sys\n")
 h.write("class CodeGen(object):\n")
 h.write("\tdef __init__(self,codeGen):\n")
 h.write("\t\tself.cg = codeGen\n")
@@ -88,7 +89,8 @@ export = """
 	def writeDataMemory(self,data):
 	def setExecuteAddress(self,address):
 	def write(self,address,data):
-	def assemble(self,opcode,operandSize = 0,operand = None)
+	def assemble(self,opcode,operandSize = 0,operand = None):
+	def setListHandle(self,handle = sys.stdout):
 """.strip().split(":")
 
 for d in [x.strip() for x in export if x.strip() != ""]:

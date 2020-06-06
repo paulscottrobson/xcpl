@@ -1,7 +1,7 @@
 # *****************************************************************************
 # *****************************************************************************
 #
-#		Name:		parser.py
+#		Name:		xparser.py
 #		Purpose:	XCPL Parser
 #		Date: 		6th June 2020
 #		Author:		Paul Robson (paul@robsons.org.uk)
