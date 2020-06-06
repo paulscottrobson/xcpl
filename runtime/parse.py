@@ -46,8 +46,8 @@ for k in keywords.keys():
 		constants[k] = labels[keywords[k]]
 	else:
 		constants[k.split()[0]] = (code & 0xF0) if code >= 256 else (code >> 4)
+#		
 constants["loadaddr"] = labels["Sour16Base"]
-constants["endaddr"] = labels["Sour16End"]
 #
 #		Load the runtime as a binary
 #

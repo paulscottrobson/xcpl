@@ -30,6 +30,8 @@ Sour16Base:		 							; starts with jump to run code/
 
 StartVector:								; +4 is the start of the Sour16 code.
 		.word 	TestCode,0 					
+HighMemory:									; +8 is the first free byte.
+		.word 	Sour16End
 
 		.include 	"sourmisc.asm"			; miscellaneous functions.
 		.include 	"sourcore.asm"			; core operations

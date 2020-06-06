@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Fri Jun  5 07:59:53 2020
+; Sat Jun  6 07:48:19 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -15,11 +15,13 @@
 .1003	ea		nop				nop 								; pad to 4 bytes.
 .1004					StartVector:
 >1004	00 13 00 00					.word 	TestCode,0
+.1008					HighMemory:
+>1008	9c 13						.word 	Sour16End
 
 ;******  Processing file: sourmisc.asm
 
 =$0a					TestVariable = Vars+2 						; we test on R1
->1008							.align 	16
+>100a							.align 	16
 .1010					TestZero:
 .1010	a5 0a		lda $0a				lda 	TestVariable
 .1012	05 0b		ora $0b				ora 	TestVariable+1

@@ -5,6 +5,7 @@ Negate		= $1342
 TestNonZero	= $1020
 BranchPlus	= $1080
 Command_LoadWordDirect= $11c0
+HighMemory	= $1008
 RunProgram	= $120c
 Command_UpdateHighSkip= $1118
 temp0		= $2a
