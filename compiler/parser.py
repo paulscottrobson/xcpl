@@ -58,6 +58,8 @@ class TextParser(object):
 		if ch == " ":														# Skip spaces
 			return self.get()
 		#
+		#		Constants (all map to decimal integer) including '<char>' and $hex
+		#
 		if ch >= '0' and ch <= '9':											# constant (decimal)
 			return self.extract(ch,TextParser.DIGITS)
 		if ch == '$':														# constant (hexadecimal)
@@ -72,6 +74,8 @@ class TextParser(object):
 				raise XCPLException("Badly formed character constant")
 			return str(ord(c1))
 		#
+		#		Quoted string (map to string prefixed by ")
+		#
 		if ch == '"':														# Quoted string.
 			s = ""
 			ch = self.getChar()														
@@ -82,8 +86,12 @@ class TextParser(object):
 				raise XCPLException("No closing quote")
 			return '"'+s 
 		#
+		#		Alphanumeric identiifer
+		#
 		if TextParser.ALPHA.find(ch.upper()) >= 0:							# Identifier.
 			return self.extract(ch,TextParser.ALPHANUM).lower()	
+		#
+		#		One or two character punctuation mix.
 		#
 		c2 = self.getChar()													# Get next one
 		if ch+c2 in self.doublePunct:										# Check for 2 char punc.
@@ -107,7 +115,7 @@ class TextParser(object):
 	def put(self,element):
 		self.tokenStack.insert(0,element)
 
-TextParser.LINEMARKER = chr(128)											# used to mark lines
+TextParser.LINEMARKER = chr(128)											# used to mark line ends.
 TextParser.DIGITS = "0123456789"											# token match lists.
 TextParser.HEXDIGITS = TextParser.DIGITS+"ABCDEF"
 TextParser.ALPHA = "ABDCDEFGHIJKLMNOPQRSTUVWXYZ"
