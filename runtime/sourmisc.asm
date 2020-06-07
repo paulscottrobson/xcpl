@@ -100,7 +100,7 @@ CallSubroutine: 		;; CALL #
 ; *****************************************************************************
 
 		.align 	16
-CallMachineCode:
+CallMachineCode:		;; XEQ
 		lda 	#Vars 						; address of variables in A
 		jsr 	MachineCodeCaller 			; call the calling code.
 		bra 	ReturnSubroutine 			; and do the return code.

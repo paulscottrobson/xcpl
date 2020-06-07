@@ -2,7 +2,8 @@
 pushd ..\runtime
 call build.bat
 popd
-rem python testcg.py
-python exprtest.py
+del dump*.bin >NUL
+rem python _testcg.py
+python _exprtest.py
 ..\bin\x16emu -debug -scale 2 -prg test.prg -run
 

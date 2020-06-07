@@ -57,6 +57,8 @@ class CodeGen(object):
 		return self.cg.assemble(0x05,0)
 	def c_call(self,operand):
 		return self.cg.assemble(0x06,2,operand)
+	def c_xeq(self,):
+		return self.cg.assemble(0x08,0)
 	def c_ret(self,):
 		return self.cg.assemble(0x09,0)
 	
