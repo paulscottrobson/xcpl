@@ -14,7 +14,7 @@ from xparser import *
 from codegen import *
 from ident import *
 from x16codegen import *
-from types import *
+from xtypes import *
 from sour16 import *
 
 # *****************************************************************************
@@ -162,6 +162,7 @@ if __name__ == "__main__":
 		(42)
 		!55 !count ?55 ?count ??4 !!4 !!count !?count
 		-4 -count	
+		!d
 	""".split("\n"))
-	for i in range(0,18):
+	for i in range(0,19):
 			tc.test(stream)

@@ -9,47 +9,6 @@
 ; *****************************************************************************
 ; *****************************************************************************
 
-; *****************************************************************************
-;
-;							Conditional Tests
-;					  (Set -1 if true, 0 if false)
-;
-; *****************************************************************************
-
-TestVariable = Vars+2 						; we test on R1
-
-		.align 	16
-TestZero:				;; TZERO
-		lda 	TestVariable		
-		ora 	TestVariable+1
-		beq 	TestTrue
-TestFalse:
-		stz 	TestVariable
-		stz 	TestVariable+1
-		jmp 	Sour16Next
-
-		.align 	16
-TestNonZero:			;; TNONZERO
-		lda 	TestVariable		
-		ora 	TestVariable+1
-		beq 	TestFalse
-TestTrue:
-		lda 	#$FF		
-		sta 	TestVariable
-		sta 	TestVariable+1
-		jmp 	Sour16Next
-
-		.align 	16
-TestNegative:			;; TMINUS
-		lda 	TestVariable+1
-		bmi 	TestTrue
-		bra 	TestFalse
-
-		.align 	16
-TestPlus:				;; TPLUS
-		lda 	TestVariable+1
-		bpl 	TestTrue
-		bra 	TestFalse
 
 ; *****************************************************************************
 ;
@@ -58,36 +17,27 @@ TestPlus:				;; TPLUS
 ;
 ; *****************************************************************************
 
+TestVariable = Vars+2 						; we test on R1
+
+
 		.align 	16
-BranchZero:				;; BRZERO +
+BranchZero:				;; BRZ +
 		lda 	TestVariable		
 		ora 	TestVariable+1
 		beq 	BranchTrue
 		bra 	BranchFalse
 
 		.align 	16
-BranchNonZero:			;; BRNONZERO +
+BranchNonZero:			;; BRNZ +
 		lda 	TestVariable		
 		ora 	TestVariable+1
 		bne 	BranchTrue
-		bra 	BranchFalse
-
-		.align 	16
-BranchMinus:			;; BRMINUS +
-		lda 	TestVariable+1	
-		bmi 	BranchTrue
-BranchFalse:
+BranchFalse:		
 		inc 	pctr
 		bcc 	BranchFalseNoCarry
 		inc 	pctr+1
 BranchFalseNoCarry:
 		jmp 	Sour16Next
-
-		.align 	16
-BranchPlus:				;; BRPLUS +
-		lda 	TestVariable+1	
-		bmi 	BranchFalse
-		bra 	BranchTrue
 
 		.align 	16
 BranchTrue:		;; BR +

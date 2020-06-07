@@ -36,27 +36,8 @@ Command_LoadConst:		;; LDI @,#
 		sta 	Vars,X
 		ldy 	#1
 		lda 	(pctr),y 					; copy the second byte in
-Command_UpdateHighSkip:		
 		sta 	Vars+1,X
 		jmp 	Sour16NextSkip2 			; return skipping 2.
-
-; *****************************************************************************
-;
-;							Add Constant to Register
-;
-; *****************************************************************************
-
-		.align 	16
-
-Command_AddConst:		;; ADI @,#
-		clc
-		lda 	(pctr) 						; first calculation, LSB
-		adc 	Vars,X
-		sta 	Vars,X
-		ldy 	#1
-		lda 	(pctr),y 					; second calculation, LSB
-		adc 	Vars+1,X
-		bra 	Command_UpdateHighSkip 		; coopt Load Constant Code.
 
 ; *****************************************************************************
 ;

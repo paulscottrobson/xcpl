@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Sat Jun 06 20:19:04 2020
+; Sun Jun  7 10:59:29 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -11,113 +11,74 @@
 >0028					pctr:	.fill 	2							; address of current routine.
 >002a					temp0:	.fill 	2
 .1000					Sour16Base:
-.1000	4c 0c 12	jmp $120c			jmp 	RunProgram
+.1000	4c fc 11	jmp $11fc			jmp 	RunProgram
 .1003	ea		nop				nop 								; pad to 4 bytes.
 .1004					StartVector:
->1004	00 13 00 00					.word 	TestCode,0
+>1004	00 00 00 00					.word 	0,0
 .1008					HighMemory:
->1008	9b 13						.word 	Sour16End
+>1008	bb 12						.word 	Sour16End
 
 ;******  Processing file: sourmisc.asm
 
 =$0a					TestVariable = Vars+2 						; we test on R1
 >100a							.align 	16
-.1010					TestZero:
+.1010					BranchZero:
 .1010	a5 0a		lda $0a				lda 	TestVariable
 .1012	05 0b		ora $0b				ora 	TestVariable+1
-.1014	f0 10		beq $1026			beq 	TestTrue
-.1016					TestFalse:
-.1016	64 0a		stz $0a				stz 	TestVariable
-.1018	64 0b		stz $0b				stz 	TestVariable+1
-.101a	4c 26 12	jmp $1226			jmp 	Sour16Next
->101d							.align 	16
-.1020					TestNonZero:
+.1014	f0 1a		beq $1030			beq 	BranchTrue
+.1016	80 0e		bra $1026			bra 	BranchFalse
+>1018							.align 	16
+.1020					BranchNonZero:
 .1020	a5 0a		lda $0a				lda 	TestVariable
 .1022	05 0b		ora $0b				ora 	TestVariable+1
-.1024	f0 f0		beq $1016			beq 	TestFalse
-.1026					TestTrue:
-.1026	a9 ff		lda #$ff			lda 	#$FF
-.1028	85 0a		sta $0a				sta 	TestVariable
-.102a	85 0b		sta $0b				sta 	TestVariable+1
-.102c	4c 26 12	jmp $1226			jmp 	Sour16Next
+.1024	d0 0a		bne $1030			bne 	BranchTrue
+.1026					BranchFalse:
+.1026	e6 28		inc $28				inc 	pctr
+.1028	90 02		bcc $102c			bcc 	BranchFalseNoCarry
+.102a	e6 29		inc $29				inc 	pctr+1
+.102c					BranchFalseNoCarry:
+.102c	4c 16 12	jmp $1216			jmp 	Sour16Next
 >102f							.align 	16
-.1030					TestNegative:
-.1030	a5 0b		lda $0b				lda 	TestVariable+1
-.1032	30 f2		bmi $1026			bmi 	TestTrue
-.1034	80 e0		bra $1016			bra 	TestFalse
->1036							.align 	16
-.1040					TestPlus:
-.1040	a5 0b		lda $0b				lda 	TestVariable+1
-.1042	10 e2		bpl $1026			bpl 	TestTrue
-.1044	80 d0		bra $1016			bra 	TestFalse
->1046							.align 	16
-.1050					BranchZero:
-.1050	a5 0a		lda $0a				lda 	TestVariable
-.1052	05 0b		ora $0b				ora 	TestVariable+1
-.1054	f0 3a		beq $1090			beq 	BranchTrue
-.1056	80 1c		bra $1074			bra 	BranchFalse
->1058							.align 	16
-.1060					BranchNonZero:
-.1060	a5 0a		lda $0a				lda 	TestVariable
-.1062	05 0b		ora $0b				ora 	TestVariable+1
-.1064	d0 2a		bne $1090			bne 	BranchTrue
-.1066	80 0c		bra $1074			bra 	BranchFalse
->1068							.align 	16
-.1070					BranchMinus:
-.1070	a5 0b		lda $0b				lda 	TestVariable+1
-.1072	30 1c		bmi $1090			bmi 	BranchTrue
-.1074					BranchFalse:
-.1074	e6 28		inc $28				inc 	pctr
-.1076	90 02		bcc $107a			bcc 	BranchFalseNoCarry
-.1078	e6 29		inc $29				inc 	pctr+1
-.107a					BranchFalseNoCarry:
-.107a	4c 26 12	jmp $1226			jmp 	Sour16Next
->107d							.align 	16
-.1080					BranchPlus:
-.1080	a5 0b		lda $0b				lda 	TestVariable+1
-.1082	30 f0		bmi $1074			bmi 	BranchFalse
-.1084	80 0a		bra $1090			bra 	BranchTrue
->1086							.align 	16
-.1090					BranchTrue:
-.1090	a2 00		ldx #$00			ldx 	#0 							; X is the sign extended offset
-.1092	b2 28		lda ($28)			lda 	(pctr) 						; get offset, this is from the offset itself.
-.1094	10 01		bpl $1097			bpl 	BTPositive
-.1096	ca		dex				dex 								; if -ve make sign extended 255
-.1097					BTPositive:
-.1097	18		clc				clc 								; add to PCTR
-.1098	65 28		adc $28				adc 	pctr
-.109a	85 28		sta $28				sta 	pctr
-.109c	8a		txa				txa
-.109d	65 29		adc $29				adc 	pctr+1
-.109f	85 29		sta $29				sta 	pctr+1
-.10a1	4c 26 12	jmp $1226			jmp 	Sour16Next
->10a4							.align 	16
-.10b0					CallSubroutine:
-.10b0	a5 29		lda $29				lda 	pctr+1 						; save PCTR Hi
-.10b2	48		pha				pha
-.10b3	a5 28		lda $28				lda 	pctr 						; save PCTR Lo
-.10b5	48		pha				pha
-.10b6	b2 28		lda ($28)			lda 	(pctr) 						; read new PC low into X
-.10b8	aa		tax				tax
-.10b9	a0 01		ldy #$01			ldy 	#1
-.10bb	b1 28		lda ($28),y			lda 	(pctr),y 					; read new PC high into A
-.10bd	85 29		sta $29				sta 	pctr+1 						; update address
-.10bf	86 28		stx $28				stx 	pctr
-.10c1	4c 26 12	jmp $1226			jmp 	Sour16Next 					; and execute from there.
->10c4							.align 	16
-.10d0					CallMachineCode:
-.10d0	a9 08		lda #$08			lda 	#Vars 						; address of variables in A
-.10d2	20 e9 10	jsr $10e9			jsr 	MachineCodeCaller 			; call the calling code.
-.10d5	80 09		bra $10e0			bra 	ReturnSubroutine 			; and do the return code.
->10d7							.align 	16
-.10e0					ReturnSubroutine:
-.10e0	68		pla				pla 								; restore PC
-.10e1	85 28		sta $28				sta 	pctr
-.10e3	68		pla				pla
-.10e4	85 29		sta $29				sta 	pctr+1
-.10e6	4c 1b 12	jmp $121b			jmp 	Sour16NextSkip2 			; return, skipping the code.
-.10e9					MachineCodeCaller:
-.10e9	6c 28 00	jmp ($0028)			jmp 	(pctr)
+.1030					BranchTrue:
+.1030	a2 00		ldx #$00			ldx 	#0 							; X is the sign extended offset
+.1032	b2 28		lda ($28)			lda 	(pctr) 						; get offset, this is from the offset itself.
+.1034	10 01		bpl $1037			bpl 	BTPositive
+.1036	ca		dex				dex 								; if -ve make sign extended 255
+.1037					BTPositive:
+.1037	18		clc				clc 								; add to PCTR
+.1038	65 28		adc $28				adc 	pctr
+.103a	85 28		sta $28				sta 	pctr
+.103c	8a		txa				txa
+.103d	65 29		adc $29				adc 	pctr+1
+.103f	85 29		sta $29				sta 	pctr+1
+.1041	4c 16 12	jmp $1216			jmp 	Sour16Next
+>1044							.align 	16
+.1050					CallSubroutine:
+.1050	a5 29		lda $29				lda 	pctr+1 						; save PCTR Hi
+.1052	48		pha				pha
+.1053	a5 28		lda $28				lda 	pctr 						; save PCTR Lo
+.1055	48		pha				pha
+.1056	b2 28		lda ($28)			lda 	(pctr) 						; read new PC low into X
+.1058	aa		tax				tax
+.1059	a0 01		ldy #$01			ldy 	#1
+.105b	b1 28		lda ($28),y			lda 	(pctr),y 					; read new PC high into A
+.105d	85 29		sta $29				sta 	pctr+1 						; update address
+.105f	86 28		stx $28				stx 	pctr
+.1061	4c 16 12	jmp $1216			jmp 	Sour16Next 					; and execute from there.
+>1064							.align 	16
+.1070					CallMachineCode:
+.1070	a9 08		lda #$08			lda 	#Vars 						; address of variables in A
+.1072	20 89 10	jsr $1089			jsr 	MachineCodeCaller 			; call the calling code.
+.1075	80 09		bra $1080			bra 	ReturnSubroutine 			; and do the return code.
+>1077							.align 	16
+.1080					ReturnSubroutine:
+.1080	68		pla				pla 								; restore PC
+.1081	85 28		sta $28				sta 	pctr
+.1083	68		pla				pla
+.1084	85 29		sta $29				sta 	pctr+1
+.1086	4c 0b 12	jmp $120b			jmp 	Sour16NextSkip2 			; return, skipping the code.
+.1089					MachineCodeCaller:
+.1089	6c 28 00	jmp ($0028)			jmp 	(pctr)
 .10f7					MiscellaneousHandler:
 .10f7	0a		asl a				asl 	a 							; on entry, 2 x the LSNibble of the word
 .10f8	0a		asl a				asl 	a 							; x 4
@@ -140,285 +101,268 @@
 .1112	95 08		sta $08,x			sta 	Vars,X
 .1114	a0 01		ldy #$01			ldy 	#1
 .1116	b1 28		lda ($28),y			lda 	(pctr),y 					; copy the second byte in
-.1118					Command_UpdateHighSkip:
 .1118	95 09		sta $09,x			sta 	Vars+1,X
-.111a	4c 1b 12	jmp $121b			jmp 	Sour16NextSkip2 			; return skipping 2.
+.111a	4c 0b 12	jmp $120b			jmp 	Sour16NextSkip2 			; return skipping 2.
 >111d							.align 	16
-.1120					Command_AddConst:
+.1120					Command_AddRegister:
 .1120	18		clc				clc
-.1121	b2 28		lda ($28)			lda 	(pctr) 						; first calculation, LSB
-.1123	75 08		adc $08,x			adc 	Vars,X
-.1125	95 08		sta $08,x			sta 	Vars,X
-.1127	a0 01		ldy #$01			ldy 	#1
-.1129	b1 28		lda ($28),y			lda 	(pctr),y 					; second calculation, LSB
-.112b	75 09		adc $09,x			adc 	Vars+1,X
-.112d	80 e9		bra $1118			bra 	Command_UpdateHighSkip 		; coopt Load Constant Code.
->112f							.align 	16
-.1130					Command_AddRegister:
-.1130	18		clc				clc
+.1121	b5 08		lda $08,x			lda 	Vars,x
+.1123	75 0a		adc $0a,x			adc 	Vars+2,x
+.1125	95 08		sta $08,x			sta		Vars,x
+.1127	b5 09		lda $09,x			lda 	Vars+1,x
+.1129	75 0b		adc $0b,x			adc 	Vars+3,x
+.112b	95 09		sta $09,x			sta		Vars+1,x
+.112d	4c 16 12	jmp $1216			jmp 	Sour16Next
+>1130							.align 	16
+.1130					Command_SubRegister:
+.1130	38		sec				sec
 .1131	b5 08		lda $08,x			lda 	Vars,x
-.1133	75 0a		adc $0a,x			adc 	Vars+2,x
+.1133	f5 0a		sbc $0a,x			sbc 	Vars+2,x
 .1135	95 08		sta $08,x			sta		Vars,x
 .1137	b5 09		lda $09,x			lda 	Vars+1,x
-.1139	75 0b		adc $0b,x			adc 	Vars+3,x
+.1139	f5 0b		sbc $0b,x			sbc 	Vars+3,x
 .113b	95 09		sta $09,x			sta		Vars+1,x
-.113d	4c 26 12	jmp $1226			jmp 	Sour16Next
+.113d	4c 16 12	jmp $1216			jmp 	Sour16Next
 >1140							.align 	16
-.1140					Command_SubRegister:
-.1140	38		sec				sec
-.1141	b5 08		lda $08,x			lda 	Vars,x
-.1143	f5 0a		sbc $0a,x			sbc 	Vars+2,x
-.1145	95 08		sta $08,x			sta		Vars,x
-.1147	b5 09		lda $09,x			lda 	Vars+1,x
-.1149	f5 0b		sbc $0b,x			sbc 	Vars+3,x
-.114b	95 09		sta $09,x			sta		Vars+1,x
-.114d	4c 26 12	jmp $1226			jmp 	Sour16Next
->1150							.align 	16
-.1150					Command_AndRegister:
+.1140					Command_AndRegister:
+.1140	b5 08		lda $08,x			lda 	Vars,x
+.1142	35 0a		and $0a,x			and 	Vars+2,x
+.1144	95 08		sta $08,x			sta		Vars,x
+.1146	b5 09		lda $09,x			lda 	Vars+1,x
+.1148	35 0b		and $0b,x			and 	Vars+3,x
+.114a	95 09		sta $09,x			sta		Vars+1,x
+.114c	4c 16 12	jmp $1216			jmp 	Sour16Next
+>114f							.align 	16
+.1150					Command_OrRegister:
 .1150	b5 08		lda $08,x			lda 	Vars,x
-.1152	35 0a		and $0a,x			and 	Vars+2,x
+.1152	15 0a		ora $0a,x			ora 	Vars+2,x
 .1154	95 08		sta $08,x			sta		Vars,x
 .1156	b5 09		lda $09,x			lda 	Vars+1,x
-.1158	35 0b		and $0b,x			and 	Vars+3,x
+.1158	15 0b		ora $0b,x			ora 	Vars+3,x
 .115a	95 09		sta $09,x			sta		Vars+1,x
-.115c	4c 26 12	jmp $1226			jmp 	Sour16Next
+.115c	4c 16 12	jmp $1216			jmp 	Sour16Next
 >115f							.align 	16
-.1160					Command_OrRegister:
+.1160					Command_XorRegister:
 .1160	b5 08		lda $08,x			lda 	Vars,x
-.1162	15 0a		ora $0a,x			ora 	Vars+2,x
+.1162	55 0a		eor $0a,x			eor 	Vars+2,x
 .1164	95 08		sta $08,x			sta		Vars,x
 .1166	b5 09		lda $09,x			lda 	Vars+1,x
-.1168	15 0b		ora $0b,x			ora 	Vars+3,x
+.1168	55 0b		eor $0b,x			eor 	Vars+3,x
 .116a	95 09		sta $09,x			sta		Vars+1,x
-.116c	4c 26 12	jmp $1226			jmp 	Sour16Next
+.116c	4c 16 12	jmp $1216			jmp 	Sour16Next
 >116f							.align 	16
-.1170					Command_XorRegister:
-.1170	b5 08		lda $08,x			lda 	Vars,x
-.1172	55 0a		eor $0a,x			eor 	Vars+2,x
-.1174	95 08		sta $08,x			sta		Vars,x
-.1176	b5 09		lda $09,x			lda 	Vars+1,x
-.1178	55 0b		eor $0b,x			eor 	Vars+3,x
-.117a	95 09		sta $09,x			sta		Vars+1,x
-.117c	4c 26 12	jmp $1226			jmp 	Sour16Next
->117f							.align 	16
-.1180					Command_StoreByteInd:
-.1180	b5 08		lda $08,x			lda 	Vars,x 						; value to write
-.1182	92 08		sta ($08)			sta 	(Vars) 						; store indirect via R0.
-.1184	4c 26 12	jmp $1226			jmp 	Sour16Next
->1187							.align 	16
-.1190					Command_LoadWordInd:
-.1190	8e 94 11	stx $1194			stx 	CLWI0+1 					; set to load high byte
-.1193					CLWI0:
-.1193	a0 01		ldy #$01			ldy 	#1
-.1195	b1 00		lda ($00),y			lda 	($00),y 					; read the high byte.
-.1197	a8		tay				tay 								; put it in Y temporarily.
-.1198	80 08		bra $11a2			bra 	CLBIEntrance 				; and do the low code
->119a							.align 	16
-.11a0					Command_LoadByteInd:
-.11a0	a0 00		ldy #$00			ldy 	#0 							; zero high byte value.
-.11a2					CLBIEntrance:
-.11a2	8e a6 11	stx $11a6			stx 	CLBI0+1 					; set to load low byte
-.11a5					CLBI0:
-.11a5	b2 00		lda ($00)			lda 	($00) 						; read the low byte.
-.11a7	95 08		sta $08,x			sta 	Vars,x 						; save it into the variable.
-.11a9	94 09		sty $09,x			sty 	Vars+1,x
-.11ab	4c 26 12	jmp $1226			jmp 	Sour16Next
->11ae							.align 	16
-.11b0					Command_Shift:
-.11b0	b5 0a		lda $0a,x			lda 	Vars+2,x 					; the LSB of the second register
-.11b2	f0 04		beq $11b8			beq 	Shift_None 					; no shift
-.11b4	30 4c		bmi $1202			bmi 	Shift_Right 				; is a signed value - is shift right logical
-.11b6	80 40		bra $11f8			bra 	Shift_Left 					; + is shift left logical.
-.11b8					Shift_None:
-.11b8	4c 26 12	jmp $1226			jmp 	Sour16Next
->11bb							.align 	16
-.11c0					Command_LoadWordDirect:
-.11c0	b2 28		lda ($28)			lda 	(pctr) 						; copy address to temp0
-.11c2	85 2a		sta $2a				sta 	temp0
-.11c4	a0 01		ldy #$01			ldy 	#1
-.11c6	b1 28		lda ($28),y			lda 	(pctr),y
-.11c8	85 2b		sta $2b				sta 	temp0+1
-.11ca	b2 2a		lda ($2a)			lda 	(temp0) 					; read LSB
-.11cc	95 08		sta $08,x			sta 	Vars,x
-.11ce	b1 2a		lda ($2a),y			lda 	(temp0),y 					; read and save MSB
-.11d0	95 09		sta $09,x			sta 	Vars+1,x
-.11d2	4c 1b 12	jmp $121b			jmp 	Sour16NextSkip2
->11d5							.align 	16
-.11e0					Command_StoreIndirectAdvance:
-.11e0	b5 08		lda $08,x			lda 	Vars,X 						; get LSB and write out
-.11e2	92 08		sta ($08)			sta 	(Vars) 						; to R0
-.11e4	b5 09		lda $09,x			lda 	Vars+1,X 					; get MSB
-.11e6	a0 01		ldy #$01			ldy 	#1 							; write MSB
-.11e8	91 08		sta ($08),y			sta 	(Vars),y
-.11ea	18		clc				clc
-.11eb	a5 08		lda $08				lda 	Vars 						; bump by 2
-.11ed	69 02		adc #$02			adc 	#2
-.11ef	85 08		sta $08				sta 	Vars
-.11f1	90 02		bcc $11f5			bcc 	CSIANoCarry 				; carry to MSB
-.11f3	e6 09		inc $09				inc 	Vars+1
-.11f5					CSIANoCarry:
-.11f5	4c 1b 12	jmp $121b			jmp 	Sour16NextSkip2
-.11f8					Shift_Left:
-.11f8	16 08		asl $08,x			asl 	Vars,x
-.11fa	36 09		rol $09,x			rol 	Vars+1,x
-.11fc	3a		dec a				dec 	a
-.11fd	d0 f9		bne $11f8			bne 	Shift_Left
-.11ff	4c 26 12	jmp $1226			jmp 	Sour16Next
-.1202					Shift_Right:
-.1202	56 09		lsr $09,x			lsr 	Vars+1,x
-.1204	76 08		ror $08,x			ror 	Vars,x
-.1206	1a		inc a				inc 	a
-.1207	d0 f9		bne $1202			bne 	Shift_Right
-.1209	4c 26 12	jmp $1226			jmp 	Sour16Next
+.1170					Command_StoreByteInd:
+.1170	b5 08		lda $08,x			lda 	Vars,x 						; value to write
+.1172	92 08		sta ($08)			sta 	(Vars) 						; store indirect via R0.
+.1174	4c 16 12	jmp $1216			jmp 	Sour16Next
+>1177							.align 	16
+.1180					Command_LoadWordInd:
+.1180	8e 84 11	stx $1184			stx 	CLWI0+1 					; set to load high byte
+.1183					CLWI0:
+.1183	a0 01		ldy #$01			ldy 	#1
+.1185	b1 00		lda ($00),y			lda 	($00),y 					; read the high byte.
+.1187	a8		tay				tay 								; put it in Y temporarily.
+.1188	80 08		bra $1192			bra 	CLBIEntrance 				; and do the low code
+>118a							.align 	16
+.1190					Command_LoadByteInd:
+.1190	a0 00		ldy #$00			ldy 	#0 							; zero high byte value.
+.1192					CLBIEntrance:
+.1192	8e 96 11	stx $1196			stx 	CLBI0+1 					; set to load low byte
+.1195					CLBI0:
+.1195	b2 00		lda ($00)			lda 	($00) 						; read the low byte.
+.1197	95 08		sta $08,x			sta 	Vars,x 						; save it into the variable.
+.1199	94 09		sty $09,x			sty 	Vars+1,x
+.119b	4c 16 12	jmp $1216			jmp 	Sour16Next
+>119e							.align 	16
+.11a0					Command_Shift:
+.11a0	b5 0a		lda $0a,x			lda 	Vars+2,x 					; the LSB of the second register
+.11a2	f0 04		beq $11a8			beq 	Shift_None 					; no shift
+.11a4	30 4c		bmi $11f2			bmi 	Shift_Right 				; is a signed value - is shift right logical
+.11a6	80 40		bra $11e8			bra 	Shift_Left 					; + is shift left logical.
+.11a8					Shift_None:
+.11a8	4c 16 12	jmp $1216			jmp 	Sour16Next
+>11ab							.align 	16
+.11b0					Command_LoadWordDirect:
+.11b0	b2 28		lda ($28)			lda 	(pctr) 						; copy address to temp0
+.11b2	85 2a		sta $2a				sta 	temp0
+.11b4	a0 01		ldy #$01			ldy 	#1
+.11b6	b1 28		lda ($28),y			lda 	(pctr),y
+.11b8	85 2b		sta $2b				sta 	temp0+1
+.11ba	b2 2a		lda ($2a)			lda 	(temp0) 					; read LSB
+.11bc	95 08		sta $08,x			sta 	Vars,x
+.11be	b1 2a		lda ($2a),y			lda 	(temp0),y 					; read and save MSB
+.11c0	95 09		sta $09,x			sta 	Vars+1,x
+.11c2	4c 0b 12	jmp $120b			jmp 	Sour16NextSkip2
+>11c5							.align 	16
+.11d0					Command_StoreIndirectAdvance:
+.11d0	b5 08		lda $08,x			lda 	Vars,X 						; get LSB and write out
+.11d2	92 08		sta ($08)			sta 	(Vars) 						; to R0
+.11d4	b5 09		lda $09,x			lda 	Vars+1,X 					; get MSB
+.11d6	a0 01		ldy #$01			ldy 	#1 							; write MSB
+.11d8	91 08		sta ($08),y			sta 	(Vars),y
+.11da	18		clc				clc
+.11db	a5 08		lda $08				lda 	Vars 						; bump by 2
+.11dd	69 02		adc #$02			adc 	#2
+.11df	85 08		sta $08				sta 	Vars
+.11e1	90 02		bcc $11e5			bcc 	CSIANoCarry 				; carry to MSB
+.11e3	e6 09		inc $09				inc 	Vars+1
+.11e5					CSIANoCarry:
+.11e5	4c 0b 12	jmp $120b			jmp 	Sour16NextSkip2
+.11e8					Shift_Left:
+.11e8	16 08		asl $08,x			asl 	Vars,x
+.11ea	36 09		rol $09,x			rol 	Vars+1,x
+.11ec	3a		dec a				dec 	a
+.11ed	d0 f9		bne $11e8			bne 	Shift_Left
+.11ef	4c 16 12	jmp $1216			jmp 	Sour16Next
+.11f2					Shift_Right:
+.11f2	56 09		lsr $09,x			lsr 	Vars+1,x
+.11f4	76 08		ror $08,x			ror 	Vars,x
+.11f6	1a		inc a				inc 	a
+.11f7	d0 f9		bne $11f2			bne 	Shift_Right
+.11f9	4c 16 12	jmp $1216			jmp 	Sour16Next
 
 ;******  Return to file: sour16.asm
 
 
 ;******  Processing file: sourrun.asm
 
-.120c					RunProgram:
-.120c	a2 ff		ldx #$ff			ldx 	#$FF 						; reset stack
-.120e	9a		txs				txs
-.120f	ad 04 10	lda $1004			lda 	StartVector 				; load the initial program counter value.
-.1212	85 28		sta $28				sta 	pctr
-.1214	ad 05 10	lda $1005			lda 	StartVector+1
-.1217	85 29		sta $29				sta 	pctr+1
-.1219	80 0b		bra $1226			bra 	Sour16Next
-.121b					Sour16NextSkip2:
-.121b	18		clc				clc
-.121c	a5 28		lda $28				lda 	pctr
-.121e	69 02		adc #$02			adc 	#2
-.1220	85 28		sta $28				sta 	pctr
-.1222	90 02		bcc $1226			bcc 	Sour16Next
-.1224	e6 29		inc $29				inc 	pctr+1
-.1226					Sour16Next:
-.1226	b2 28		lda ($28)			lda 	(pctr) 						; get the opcode
-.1228	e6 28		inc $28				inc 	pctr 						; skip the opcode.
-.122a	d0 02		bne $122e			bne 	Sour16NoCarry
-.122c	e6 29		inc $29				inc 	pctr+1
-.122e					Sour16NoCarry:
-.122e	aa		tax				tax 								; save in X
-.122f	29 f0		and #$f0			and 	#$F0
-.1231	8d 3a 12	sta $123a			sta 	S16NJmp+1 					; modify the jump address
-.1234	8a		txa				txa 			 					; get the opcode back from X
-.1235	29 0f		and #$0f			and 	#15 						; index into the register block.
-.1237	0a		asl a				asl 	a 							; (reg# x 2) is also in A.
-.1238	aa		tax				tax
-.1239					S16NJmp:
-.1239	4c 00 11	jmp $1100			jmp 	Sour16RootCommandSet
->123c							.align 	256
-.1300					TestCode:
->1300	12 69 00					.byte 	$12,105,0 		; R2 / R3
->1303	13 0a 00					.byte 	$13,10,0
->1306	1f 02 00					.byte 	$1F,$02,$00 		; tell it R2 is low register
->1309	0a 5c 13					.byte 	$0A,Modulus & $FF,Modulus	 >> 8
+.11fc					RunProgram:
+.11fc	a2 ff		ldx #$ff			ldx 	#$FF 						; reset stack
+.11fe	9a		txs				txs
+.11ff	ad 04 10	lda $1004			lda 	StartVector 				; load the initial program counter value.
+.1202	85 28		sta $28				sta 	pctr
+.1204	ad 05 10	lda $1005			lda 	StartVector+1
+.1207	85 29		sta $29				sta 	pctr+1
+.1209	80 0b		bra $1216			bra 	Sour16Next
+.120b					Sour16NextSkip2:
+.120b	18		clc				clc
+.120c	a5 28		lda $28				lda 	pctr
+.120e	69 02		adc #$02			adc 	#2
+.1210	85 28		sta $28				sta 	pctr
+.1212	90 02		bcc $1216			bcc 	Sour16Next
+.1214	e6 29		inc $29				inc 	pctr+1
+.1216					Sour16Next:
+.1216	b2 28		lda ($28)			lda 	(pctr) 						; get the opcode
+.1218	e6 28		inc $28				inc 	pctr 						; skip the opcode.
+.121a	d0 02		bne $121e			bne 	Sour16NoCarry
+.121c	e6 29		inc $29				inc 	pctr+1
+.121e					Sour16NoCarry:
+.121e	aa		tax				tax 								; save in X
+.121f	29 f0		and #$f0			and 	#$F0
+.1221	8d 2a 12	sta $122a			sta 	S16NJmp+1 					; modify the jump address
+.1224	8a		txa				txa 			 					; get the opcode back from X
+.1225	29 0f		and #$0f			and 	#15 						; index into the register block.
+.1227	0a		asl a				asl 	a 							; (reg# x 2) is also in A.
+.1228	aa		tax				tax
+.1229					S16NJmp:
+.1229	4c 00 11	jmp $1100			jmp 	Sour16RootCommandSet
 
 ;******  Return to file: sour16.asm
 
 
 ;******  Processing file: sourextras.asm
 
-=13					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
-.130c					Multiply:
->130c	0d						.byte 	CodeOpcode
-.130d	aa		tax				tax 								; save Base in X.
-.130e	18		clc				clc
-.130f	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
-.1311	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
-.1313	aa		tax				tax
-.1314	64 2a		stz $2a				stz 	temp0 						; clear result
-.1316	64 2b		stz $2b				stz 	temp0+1
-.1318					_MultLoop:
-.1318	b5 00		lda $00,x			lda 	0,X 						; check LSB of lower byte
-.131a	29 01		and #$01			and 	#1
-.131c	f0 0d		beq $132b			beq 	_MultNoAdd
-.131e	18		clc				clc 								; add in.
-.131f	a5 2a		lda $2a				lda 	temp0
-.1321	75 02		adc $02,x			adc 	2,x
-.1323	85 2a		sta $2a				sta 	temp0
-.1325	a5 2b		lda $2b				lda 	temp0+1
-.1327	75 03		adc $03,x			adc 	3,x
-.1329	85 2b		sta $2b				sta 	temp0+1
-.132b					_MultNoAdd:
-.132b	56 01		lsr $01,x			lsr 	1,x 						; shift one right and one left
-.132d	76 00		ror $00,x			ror 	0,x
-.132f	16 02		asl $02,x			asl 	2,x
-.1331	36 03		rol $03,x			rol 	3,x
-.1333	b5 00		lda $00,x			lda 	0,x 						; check if done
-.1335	15 01		ora $01,x			ora 	1,x
-.1337	d0 df		bne $1318			bne 	_MultLoop
-.1339	a5 2a		lda $2a				lda 	temp0 						; copy result back.
-.133b	95 00		sta $00,x			sta 	0,x
-.133d	a5 2b		lda $2b				lda 	temp0+1
-.133f	95 01		sta $01,x			sta 	1,x
-.1341	60		rts				rts
-.1342					Negate:
->1342	0d						.byte 	CodeOpcode
-.1343	aa		tax				tax 								; save Base in X.
-.1344	18		clc				clc
-.1345	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
-.1347	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
-.1349	aa		tax				tax
-.134a	38		sec				sec
-.134b	a9 00		lda #$00			lda 	#0
-.134d	f5 00		sbc $00,x			sbc 	0,x
-.134f	95 00		sta $00,x			sta 	0,x
-.1351	a9 00		lda #$00			lda 	#0
-.1353	f5 01		sbc $01,x			sbc 	1,x
-.1355	95 01		sta $01,x			sta 	1,x
-.1357	60		rts				rts
-.1358					Divide:
->1358	0d						.byte 	CodeOpcode
-.1359	38		sec				sec
-.135a	80 02		bra $135e			bra 	DivideModulus
-.135c					Modulus:
->135c	0d						.byte 	CodeOpcode
-.135d	18		clc				clc
-.135e					DivideModulus:
-.135e	08		php				php
-.135f	aa		tax				tax 								; save Base in X.
-.1360	18		clc				clc
-.1361	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
-.1363	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
-.1365	aa		tax				tax
-.1366	5a		phy				phy 								; Y is the iteration counter
-.1367	a0 10		ldy #$10			ldy 	#16
-.1369	64 2a		stz $2a				stz 	temp0 						; zero A
-.136b	64 2b		stz $2b				stz 	temp0+1
-.136d					_DivideLoop:
-.136d	16 00		asl $00,x			asl 	0,x 						; shift AQ left
-.136f	36 01		rol $01,x			rol 	1,x
-.1371	26 2a		rol $2a				rol 	temp0
-.1373	26 2b		rol $2b				rol 	temp0+1
-.1375	38		sec				sec
-.1376	a5 2a		lda $2a				lda 	temp0 						; do A-M calculation
-.1378	f5 02		sbc $02,x			sbc 	2,x
-.137a	48		pha				pha 								; saved on stack
-.137b	a5 2b		lda $2b				lda 	temp0+1
-.137d	f5 03		sbc $03,x			sbc 	3,x
-.137f	90 09		bcc $138a			bcc 	_DivideNoAdd
-.1381	85 2b		sta $2b				sta 	temp0+1 					; A-M >= 0
-.1383	68		pla				pla 								; so save the subtraction
-.1384	85 2a		sta $2a				sta 	temp0
-.1386	f6 00		inc $00,x			inc		0,x 						; set the LSB
-.1388	80 01		bra $138b			bra 	_DivideNext
-.138a					_DivideNoAdd:
-.138a	68		pla				pla 								; throw the interim result
-.138b					_DivideNext:
-.138b	88		dey				dey 								; do the correct number of iterations
-.138c	d0 df		bne $136d			bne 	_DivideLoop
-.138e	7a		ply				ply 								; restore Y
-.138f	28		plp				plp 								; return div (CS) mod (CC)
-.1390	b0 08		bcs $139a			bcs 	_DivideExit
-.1392	a5 2a		lda $2a				lda 	temp0
-.1394	95 00		sta $00,x			sta 	0,x
-.1396	a5 2b		lda $2b				lda 	temp0+1
-.1398	95 01		sta $01,x			sta 	1,x
-.139a					_DivideExit:
-.139a	60		rts				rts
+=7					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
+.122c					Multiply:
+>122c	07						.byte 	CodeOpcode
+.122d	aa		tax				tax 								; save Base in X.
+.122e	18		clc				clc
+.122f	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.1231	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1233	aa		tax				tax
+.1234	64 2a		stz $2a				stz 	temp0 						; clear result
+.1236	64 2b		stz $2b				stz 	temp0+1
+.1238					_MultLoop:
+.1238	b5 00		lda $00,x			lda 	0,X 						; check LSB of lower byte
+.123a	29 01		and #$01			and 	#1
+.123c	f0 0d		beq $124b			beq 	_MultNoAdd
+.123e	18		clc				clc 								; add in.
+.123f	a5 2a		lda $2a				lda 	temp0
+.1241	75 02		adc $02,x			adc 	2,x
+.1243	85 2a		sta $2a				sta 	temp0
+.1245	a5 2b		lda $2b				lda 	temp0+1
+.1247	75 03		adc $03,x			adc 	3,x
+.1249	85 2b		sta $2b				sta 	temp0+1
+.124b					_MultNoAdd:
+.124b	56 01		lsr $01,x			lsr 	1,x 						; shift one right and one left
+.124d	76 00		ror $00,x			ror 	0,x
+.124f	16 02		asl $02,x			asl 	2,x
+.1251	36 03		rol $03,x			rol 	3,x
+.1253	b5 00		lda $00,x			lda 	0,x 						; check if done
+.1255	15 01		ora $01,x			ora 	1,x
+.1257	d0 df		bne $1238			bne 	_MultLoop
+.1259	a5 2a		lda $2a				lda 	temp0 						; copy result back.
+.125b	95 00		sta $00,x			sta 	0,x
+.125d	a5 2b		lda $2b				lda 	temp0+1
+.125f	95 01		sta $01,x			sta 	1,x
+.1261	60		rts				rts
+.1262					Negate:
+>1262	07						.byte 	CodeOpcode
+.1263	aa		tax				tax 								; save Base in X.
+.1264	18		clc				clc
+.1265	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.1267	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1269	aa		tax				tax
+.126a	38		sec				sec
+.126b	a9 00		lda #$00			lda 	#0
+.126d	f5 00		sbc $00,x			sbc 	0,x
+.126f	95 00		sta $00,x			sta 	0,x
+.1271	a9 00		lda #$00			lda 	#0
+.1273	f5 01		sbc $01,x			sbc 	1,x
+.1275	95 01		sta $01,x			sta 	1,x
+.1277	60		rts				rts
+.1278					Divide:
+>1278	07						.byte 	CodeOpcode
+.1279	38		sec				sec
+.127a	80 02		bra $127e			bra 	DivideModulus
+.127c					Modulus:
+>127c	07						.byte 	CodeOpcode
+.127d	18		clc				clc
+.127e					DivideModulus:
+.127e	08		php				php
+.127f	aa		tax				tax 								; save Base in X.
+.1280	18		clc				clc
+.1281	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.1283	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1285	aa		tax				tax
+.1286	5a		phy				phy 								; Y is the iteration counter
+.1287	a0 10		ldy #$10			ldy 	#16
+.1289	64 2a		stz $2a				stz 	temp0 						; zero A
+.128b	64 2b		stz $2b				stz 	temp0+1
+.128d					_DivideLoop:
+.128d	16 00		asl $00,x			asl 	0,x 						; shift AQ left
+.128f	36 01		rol $01,x			rol 	1,x
+.1291	26 2a		rol $2a				rol 	temp0
+.1293	26 2b		rol $2b				rol 	temp0+1
+.1295	38		sec				sec
+.1296	a5 2a		lda $2a				lda 	temp0 						; do A-M calculation
+.1298	f5 02		sbc $02,x			sbc 	2,x
+.129a	48		pha				pha 								; saved on stack
+.129b	a5 2b		lda $2b				lda 	temp0+1
+.129d	f5 03		sbc $03,x			sbc 	3,x
+.129f	90 09		bcc $12aa			bcc 	_DivideNoAdd
+.12a1	85 2b		sta $2b				sta 	temp0+1 					; A-M >= 0
+.12a3	68		pla				pla 								; so save the subtraction
+.12a4	85 2a		sta $2a				sta 	temp0
+.12a6	f6 00		inc $00,x			inc		0,x 						; set the LSB
+.12a8	80 01		bra $12ab			bra 	_DivideNext
+.12aa					_DivideNoAdd:
+.12aa	68		pla				pla 								; throw the interim result
+.12ab					_DivideNext:
+.12ab	88		dey				dey 								; do the correct number of iterations
+.12ac	d0 df		bne $128d			bne 	_DivideLoop
+.12ae	7a		ply				ply 								; restore Y
+.12af	28		plp				plp 								; return div (CS) mod (CC)
+.12b0	b0 08		bcs $12ba			bcs 	_DivideExit
+.12b2	a5 2a		lda $2a				lda 	temp0
+.12b4	95 00		sta $00,x			sta 	0,x
+.12b6	a5 2b		lda $2b				lda 	temp0+1
+.12b8	95 01		sta $01,x			sta 	1,x
+.12ba					_DivideExit:
+.12ba	60		rts				rts
 
 ;******  Return to file: sour16.asm
 
-.139b					Sour16End:
+.12bb					Sour16End:
 
 ;******  End of listing

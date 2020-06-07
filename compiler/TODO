@@ -1,9 +1,8 @@
 Process:
 
+- Write conditional routines for >= > <= < (== and <> use sub/xor)
+- Normalise R1 routine (non-zero to -1/0)
 - Expressions
-	Conditions always return constants via utility functions.
-	Branch true/Branch false only on R1 ?
-	Current does not work. 
 - Actually run test code with some sort of assertion ? Add assert (r1 = 0) and break
 - Assignment 
 - Command groups

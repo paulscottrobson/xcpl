@@ -29,7 +29,7 @@ Sour16Base:		 							; starts with jump to run code/
 		nop 								; pad to 4 bytes.
 
 StartVector:								; +4 is the start of the Sour16 code.
-		.word 	TestCode,0 					
+		.word 	0,0 					
 HighMemory:									; +8 is the first free byte.
 		.word 	Sour16End
 

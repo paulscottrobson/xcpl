@@ -14,7 +14,7 @@ from xparser import *
 from codegen import *
 from ident import *
 from x16codegen import *
-from types import *
+from xtypes import *
 from term import *
 from sour16 import *
 
@@ -23,7 +23,7 @@ from sour16 import *
 #						Expression compiler worker class
 #
 # *****************************************************************************
-#
+
 class ExpressionCompiler(object):
 	def __init__(self,codeGenerator,identStore):
 		self.cg = codeGenerator
@@ -35,13 +35,36 @@ class ExpressionCompiler(object):
 	def compile(self,stream,regLevel,termCompiler):
 		return self.compileAtPrecedenceLevel(0,stream,regLevel,termCompiler)
 	#
+	#		Compiles at a specific precedence level.
+	#
 	def compileAtPrecedenceLevel(self,precedence,stream,regLevel,termCompiler):
+		#
+		#		Get first term, left side.
+		#
 		current = termCompiler.compile(stream,regLevel,self)
+		#
+		#		Get following semantic item
+		#
 		operator = stream.get()
+		#
+		#		Keep going while it's a binary operator and correct precedence
+		#
 		while operator in ExpressionCompiler.OPERATORS and ExpressionCompiler.OPERATORS[operator] > precedence:
+			#
+			#		Work out the RHS
+			#
 			rightSide = self.compileAtPrecedenceLevel(ExpressionCompiler.OPERATORS[operator],stream,regLevel+1,termCompiler)
+			#
+			#		Do the binary arithmetic calculation
+			#
 			current = self.doBinaryCalculation(current,operator,rightSide,regLevel,termCompiler)
+			#
+			#		Get the next operator
+			#
 			operator = stream.get()
+		#
+		#		Put back the item read that isn't a binary operator.
+		#
 		stream.put(operator)
 		return current
 	#
@@ -49,7 +72,7 @@ class ExpressionCompiler(object):
 	#
 	def doBinaryCalculation(self,current,operator,rightSide,regLevel,termCompiler):
 		#
-		#		Try short cuts - numeric constants, adding/sub constants, shifts for multiply.
+		#		Try short cuts - numeric constants, shifts for multiply etc.
 		#
 		optimise = self.optimiseCalculation(current,operator,rightSide,regLevel,termCompiler)
 		if optimise is not None:
@@ -62,8 +85,8 @@ class ExpressionCompiler(object):
 		#
 		#		Generate the appropriate code and return the value. There are four types here
 		#			(i) 	those supported by the opcodes directly (+ - & | ^ <<)
-		#			(ii) 	those supported by utility functions (* / %)
-		#			(iii)	conditions.
+		#			(ii) 	those supported by utility functions (* / % >= < > <=)
+		#			(iii)	conditions (== <>)
 		#			(iv) 	those with special code (>>)
 		#
 		# BODGE FOR TESTING
@@ -111,6 +134,7 @@ if __name__ == "__main__":
 	ec = ExpressionCompiler(codeGen,idStore)
 
 	src = """
+		!d
 		1-(2+3)+4
 		a&b+c-d
 		count+1

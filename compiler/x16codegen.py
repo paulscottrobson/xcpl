@@ -15,11 +15,11 @@ import sys
 
 # *****************************************************************************
 #
-#							Code Generator (Commander X16)
+#							Code Generator Base Class
 #
 # *****************************************************************************
 
-class X16CodeGen(object):
+class BaseCodeGenClass(object):
 	#
 	#		Initialisation. Copies the run time, and allocates uninitialised and initialised
 	#		Data memory
@@ -27,7 +27,8 @@ class X16CodeGen(object):
 	def __init__(self,uninitSize,initSize):
 		self.code = [x for x in Sour16.RUNTIME]									# code object
 		self.base = Sour16.LOADADDR 											# the load address
-		self._setupMemoryUsage(uninitSize,initSize)
+		freeMem = self.code[8]+self.code[9]*256
+		self._setupMemoryUsage(freeMem,uninitSize,initSize)
 		self.codeStart = self.codePtr
 		self.listCode = None
 	#
@@ -112,6 +113,24 @@ class X16CodeGen(object):
 	#
 	def setListHandle(self,handle = sys.stdout):
 		self.listCode = handle	
+
+# *****************************************************************************
+#
+#							Code Generator (Commander X16)
+#
+# *****************************************************************************
+
+class X16CodeGen(BaseCodeGenClass):
+	def _setupMemoryUsage(self,freeMem,uninitSize,initSize):
+		#
+		self.iPointer = freeMem 												# initialised data
+		self.iLimit = self.iPointer + initSize 									# space
+		#
+		self.uPointer = self.iLimit												# uninitialised data space
+		self.uLimit = self.uPointer + uninitSize
+		#
+		self.codePtr = self.uLimit 												# where code actually goes.
+		self.codeLimit = 0x9F00													# where it ends.
 		
 if __name__ == "__main__":
 	cg = X16CodeGen(1024,1024)
