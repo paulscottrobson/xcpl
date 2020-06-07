@@ -174,6 +174,8 @@ if __name__ == "__main__":
 		!55 !count ?55 ?count ??4 !!4 !!count !?count
 		-4 -count	
 		!d
+		?4096
+		!4096
 	""".split("\n"))
-	for i in range(0,19):
+	for i in range(0,21):
 			tc.test(stream)

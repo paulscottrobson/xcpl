@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Sun Jun 07 19:19:00 2020
+; Sun Jun 07 20:14:30 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -163,25 +163,27 @@
 .1170	b5 08		lda $08,x			lda 	Vars,x 						; value to write
 .1172	92 08		sta ($08)			sta 	(Vars) 						; store indirect via R0.
 .1174	4c 16 12	jmp $1216			jmp 	Sour16Next
->1177							.align 	16
+.1177					CompleteLWI:
+.1177	a0 01		ldy #$01			ldy 	#1 							; read the MSB and write out.
+.1179	b1 2a		lda ($2a),y			lda 	(temp0),y
+.117b	95 09		sta $09,x			sta 	Vars+1,x
+.117d	4c 16 12	jmp $1216			jmp 	Sour16Next
+>1180							.align 	16
 .1180					Command_LoadWordInd:
-.1180	8e 84 11	stx $1184			stx 	CLWI0+1 					; set to load high byte
-.1183					CLWI0:
-.1183	a0 01		ldy #$01			ldy 	#1
-.1185	b1 00		lda ($00),y			lda 	($00),y 					; read the high byte.
-.1187	a8		tay				tay 								; put it in Y temporarily.
-.1188	80 08		bra $1192			bra 	CLBIEntrance 				; and do the low code
->118a							.align 	16
+.1180	b5 08		lda $08,x			lda 	Vars,x 						; copy Vars,X to Temp0
+.1182	85 2a		sta $2a				sta 	temp0
+.1184	b5 09		lda $09,x			lda 	Vars+1,x
+.1186	85 2b		sta $2b				sta 	temp0+1
+.1188	b2 2a		lda ($2a)			lda 	(temp0) 					; read the low byte indirectly
+.118a	95 08		sta $08,x			sta 	Vars,x 						; save it into the variable.
+.118c	80 e9		bra $1177			bra 	CompleteLWI
+>118e							.align 	16
 .1190					Command_LoadByteInd:
-.1190	a0 00		ldy #$00			ldy 	#0 							; zero high byte value.
-.1192					CLBIEntrance:
-.1192	8e 96 11	stx $1196			stx 	CLBI0+1 					; set to load low byte
-.1195					CLBI0:
-.1195	b2 00		lda ($00)			lda 	($00) 						; read the low byte.
-.1197	95 08		sta $08,x			sta 	Vars,x 						; save it into the variable.
-.1199	94 09		sty $09,x			sty 	Vars+1,x
-.119b	4c 16 12	jmp $1216			jmp 	Sour16Next
->119e							.align 	16
+.1190	a1 08		lda ($08,x)			lda 	(Vars,X) 					; read the byte indirectly
+.1192	95 08		sta $08,x			sta 	Vars,x 						; save it into the variable.
+.1194	74 09		stz $09,x			stz 	Vars+1,x 					; clear the MSB.
+.1196	4c 16 12	jmp $1216			jmp 	Sour16Next
+>1199							.align 	16
 .11a0					Command_Shift:
 .11a0	b5 0a		lda $0a,x			lda 	Vars+2,x 					; the LSB of the second register
 .11a2	f0 04		beq $11a8			beq 	Shift_None 					; no shift

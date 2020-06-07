@@ -29,6 +29,7 @@ class ExpressionCompiler(object):
 		self.cg = codeGenerator
 		self.identStore = identStore
 		self.opTokens = { "+":0,"-":0,"&":0,"^":0,"|":0,"<<":0 }
+		self.rtTokens = { "*":Sour16.X_MULTIPLY,"/":Sour16.X_DIVIDE,"%":Sour16.X_MODULUS }
 	#
 	#		Compile an expression at the given level from the given stream.
 	#		Does not convert to a final value.
@@ -84,18 +85,19 @@ class ExpressionCompiler(object):
 		termCompiler.convertToValue(current,regLevel)
 		termCompiler.convertToValue(rightSide,regLevel+1)
 		#
-		#		Generate the appropriate code and return the value. There are four types here
+		#		Generate the appropriate code and return the value. There are three types here
 		#			(i) 	those supported by the opcodes directly (+ - & | ^ <<)
 		#			(ii) 	those supported by utility functions (* / % >= < > <=)
-		#			(iii)	conditions (== <>)
-		#			(iv) 	those with special code (>>)
+		#			(iii)	everything else : conditions (== <>)special code (>>)
 		#
 		if operator in self.opTokens:
-			self.compileBinaryOperatorOpcode(operator,regLevel)
-
-		return [VType.VALUE]
+			return self.compileBinaryOperatorOpcode(operator,regLevel)
+		elif operator in self.rtTokens:
+			return self.compileBinaryRoutineCall(self.rtTokens[operator],regLevel,termCompiler)
+		else:
+			return self.compileBinarySpecial(operator,regLevel,termCompiler)
 	#
-	#		Short cut calculations.
+	#		Short cut calculations. a>>const /*% power of 2. 
 	#
 	def optimiseCalculation(self,current,operator,rightSide,regLevel,termCompiler):
 		return None
@@ -117,6 +119,31 @@ class ExpressionCompiler(object):
 			self.cg.c_shf(reg)
 		else:
 			assert False
+		return [VType.VALUE]
+	#
+	#		Compile a utility function routine.
+	#
+	def compileBinaryRoutineCall(self,routineAddr,regLevel,termCompiler):
+		termCompiler.loadConstantCode(15,regLevel)
+		self.cg.c_call(routineAddr)
+		return [VType.VALUE]
+	#
+	#		Special cases
+	#
+	def compileBinarySpecial(self,op,reg,termCompiler):
+		#
+		#		Binary indirection operators
+		#
+		if op == "!" or op == "?":
+			self.cg.c_add(reg)
+			return [VType.BYTEREF if op == "?" else VType.WORDREF]
+		#
+		#		Shift right
+		#
+		if op == ">>":
+			termCompiler.negateRegister(reg+1)
+			self.cg.c_shf(reg)
+		return [VType.VALUE]
 	#
 	#		Test routine. 
 	#
@@ -137,7 +164,7 @@ ExpressionCompiler.OPERATORS = {
 	"&":1,	"|":1,	"^":1,
 	"<":2,	"<=":2,	">":2,	">=":2,	"==":2,	"<>":2,
 	"+":3,	"-":3,
-	"*":4,	"/":4,	">>":4,	"<<":4,
+	"*":4,	"/":4,	"%":4,	">>":4,	"<<":4,
 	"!":5,	"?":5
 }
 

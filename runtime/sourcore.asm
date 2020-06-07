@@ -145,15 +145,21 @@ Command_StoreByteInd:	;; SBI @
 ;
 ; *****************************************************************************
 
+CompleteLWI:
+		ldy 	#1 							; read the MSB and write out.
+		lda 	(temp0),y
+		sta 	Vars+1,x
+		jmp 	Sour16Next	
 		.align 	16
 
 Command_LoadWordInd:	;; LWI @
-		stx 	CLWI0+1 					; set to load high byte
-CLWI0:		
-		ldy 	#1
-		lda 	($00),y 					; read the high byte.
-		tay 								; put it in Y temporarily.
-		bra 	CLBIEntrance 				; and do the low code
+		lda 	Vars,x 						; copy Vars,X to Temp0
+		sta 	temp0
+		lda 	Vars+1,x
+		sta 	temp0+1
+		lda 	(temp0) 					; read the low byte indirectly
+		sta 	Vars,x 						; save it into the variable.
+		bra 	CompleteLWI
 
 ; *****************************************************************************
 ;
@@ -164,16 +170,9 @@ CLWI0:
 		.align 	16
 
 Command_LoadByteInd:	;; LBI @
-		ldy 	#0 							; zero high byte value.
-		;
-		;		Entering here, Y contains the loaded MSB/zero and Y pos is stacked.
-		;
-CLBIEntrance:
-		stx 	CLBI0+1 					; set to load low byte
-CLBI0:
-		lda 	($00) 						; read the low byte.
+		lda 	(Vars,X) 					; read the byte indirectly
 		sta 	Vars,x 						; save it into the variable.
-		sty 	Vars+1,x
+		stz 	Vars+1,x 					; clear the MSB.
 		jmp 	Sour16Next
 
 ; *****************************************************************************

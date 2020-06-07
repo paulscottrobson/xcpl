@@ -29,6 +29,16 @@ src = """
 		12345^7531 => 11602
 		12345|7531 => 15739
 		12345<<2 => 49380
+		41*1000 => 41000
+		31000/100 => 310
+		12345%1000 => 345
+		?$1010 => $A5
+		!$1010 => $0AA5
+		$1000?$10 => $A5
+		$1000!$10 => $0AA5
+		12345 >> 2 => 3086
+		(2+3)*4 => 20
+		(2+3)*(4+5) => 45
 """.strip().split("\n")
 src = [x.strip() for x in src if x.strip() != ""]
 for i in range(0,len(src)):
@@ -42,6 +52,7 @@ codeGen.setExecuteAddress(codeStart)
 
 stream = TextParser(src)
 for i in range(0,len(src)):
+	print(">>>>>> "+src[i])
 	ec.test(stream,tc)
 	codeGen.c_chz()
 print("Patch XEQ ; JMP $FFFF")
