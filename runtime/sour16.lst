@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Sun Jun  7 10:59:29 2020
+; Sun Jun 07 15:26:00 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -53,32 +53,40 @@
 .103f	85 29		sta $29				sta 	pctr+1
 .1041	4c 16 12	jmp $1216			jmp 	Sour16Next
 >1044							.align 	16
-.1050					CallSubroutine:
-.1050	a5 29		lda $29				lda 	pctr+1 						; save PCTR Hi
-.1052	48		pha				pha
-.1053	a5 28		lda $28				lda 	pctr 						; save PCTR Lo
-.1055	48		pha				pha
-.1056	b2 28		lda ($28)			lda 	(pctr) 						; read new PC low into X
-.1058	aa		tax				tax
-.1059	a0 01		ldy #$01			ldy 	#1
-.105b	b1 28		lda ($28),y			lda 	(pctr),y 					; read new PC high into A
-.105d	85 29		sta $29				sta 	pctr+1 						; update address
-.105f	86 28		stx $28				stx 	pctr
-.1061	4c 16 12	jmp $1216			jmp 	Sour16Next 					; and execute from there.
->1064							.align 	16
-.1070					CallMachineCode:
-.1070	a9 08		lda #$08			lda 	#Vars 						; address of variables in A
-.1072	20 89 10	jsr $1089			jsr 	MachineCodeCaller 			; call the calling code.
-.1075	80 09		bra $1080			bra 	ReturnSubroutine 			; and do the return code.
->1077							.align 	16
-.1080					ReturnSubroutine:
-.1080	68		pla				pla 								; restore PC
-.1081	85 28		sta $28				sta 	pctr
-.1083	68		pla				pla
-.1084	85 29		sta $29				sta 	pctr+1
-.1086	4c 0b 12	jmp $120b			jmp 	Sour16NextSkip2 			; return, skipping the code.
-.1089					MachineCodeCaller:
-.1089	6c 28 00	jmp ($0028)			jmp 	(pctr)
+.1050					AssertCmd:
+.1050	a5 0a		lda $0a				lda 	TestVariable 				; check R1
+.1052	05 0b		ora $0b				ora 	TestVariable+1
+.1054	f0 01		beq $1057			beq 	AssertOkay
+>1056	ff						.byte 	$FF 						; if non zero break the emulator
+.1057					AssertOkay:
+.1057	4c 16 12	jmp $1216			jmp 	Sour16Next
+>105a							.align 	16
+.1060					CallSubroutine:
+.1060	a5 29		lda $29				lda 	pctr+1 						; save PCTR Hi
+.1062	48		pha				pha
+.1063	a5 28		lda $28				lda 	pctr 						; save PCTR Lo
+.1065	48		pha				pha
+.1066	b2 28		lda ($28)			lda 	(pctr) 						; read new PC low into X
+.1068	aa		tax				tax
+.1069	a0 01		ldy #$01			ldy 	#1
+.106b	b1 28		lda ($28),y			lda 	(pctr),y 					; read new PC high into A
+.106d	85 29		sta $29				sta 	pctr+1 						; update address
+.106f	86 28		stx $28				stx 	pctr
+.1071	4c 16 12	jmp $1216			jmp 	Sour16Next 					; and execute from there.
+>1074							.align 	16
+.1080					CallMachineCode:
+.1080	a9 08		lda #$08			lda 	#Vars 						; address of variables in A
+.1082	20 99 10	jsr $1099			jsr 	MachineCodeCaller 			; call the calling code.
+.1085	80 09		bra $1090			bra 	ReturnSubroutine 			; and do the return code.
+>1087							.align 	16
+.1090					ReturnSubroutine:
+.1090	68		pla				pla 								; restore PC
+.1091	85 28		sta $28				sta 	pctr
+.1093	68		pla				pla
+.1094	85 29		sta $29				sta 	pctr+1
+.1096	4c 0b 12	jmp $120b			jmp 	Sour16NextSkip2 			; return, skipping the code.
+.1099					MachineCodeCaller:
+.1099	6c 28 00	jmp ($0028)			jmp 	(pctr)
 .10f7					MiscellaneousHandler:
 .10f7	0a		asl a				asl 	a 							; on entry, 2 x the LSNibble of the word
 .10f8	0a		asl a				asl 	a 							; x 4
@@ -96,7 +104,7 @@
 .1100					Command_Miscellaneous:
 .1100	80 f5		bra $10f7			bra 	MiscellaneousHandler
 >1102							.align 	16
-.1110					Command_LoadConst:
+.1110					Command_LoadConstWord:
 .1110	b2 28		lda ($28)			lda 	(pctr) 						; copy the first byte in
 .1112	95 08		sta $08,x			sta 	Vars,X
 .1114	a0 01		ldy #$01			ldy 	#1
@@ -262,9 +270,9 @@
 
 ;******  Processing file: sourextras.asm
 
-=7					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
+=8					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
 .122c					Multiply:
->122c	07						.byte 	CodeOpcode
+>122c	08						.byte 	CodeOpcode
 .122d	aa		tax				tax 								; save Base in X.
 .122e	18		clc				clc
 .122f	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
@@ -297,7 +305,7 @@
 .125f	95 01		sta $01,x			sta 	1,x
 .1261	60		rts				rts
 .1262					Negate:
->1262	07						.byte 	CodeOpcode
+>1262	08						.byte 	CodeOpcode
 .1263	aa		tax				tax 								; save Base in X.
 .1264	18		clc				clc
 .1265	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
@@ -312,11 +320,11 @@
 .1275	95 01		sta $01,x			sta 	1,x
 .1277	60		rts				rts
 .1278					Divide:
->1278	07						.byte 	CodeOpcode
+>1278	08						.byte 	CodeOpcode
 .1279	38		sec				sec
 .127a	80 02		bra $127e			bra 	DivideModulus
 .127c					Modulus:
->127c	07						.byte 	CodeOpcode
+>127c	08						.byte 	CodeOpcode
 .127d	18		clc				clc
 .127e					DivideModulus:
 .127e	08		php				php

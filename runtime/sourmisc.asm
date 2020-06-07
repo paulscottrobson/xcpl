@@ -19,7 +19,6 @@
 
 TestVariable = Vars+2 						; we test on R1
 
-
 		.align 	16
 BranchZero:				;; BRZ +
 		lda 	TestVariable		
@@ -55,6 +54,21 @@ BTPositive:
 		sta 	pctr+1
 		jmp 	Sour16Next
 
+; *****************************************************************************
+;
+;						Assert opcode - checks R1 = 0
+;
+; *****************************************************************************
+
+		.align 	16
+AssertCmd: 				;; CHZ	
+		lda 	TestVariable 				; check R1
+		ora 	TestVariable+1
+		beq 	AssertOkay
+		.byte 	$FF 						; if non zero break the emulator
+AssertOkay:
+		jmp 	Sour16Next	
+			
 ; *****************************************************************************
 ;
 ;								Call subroutine

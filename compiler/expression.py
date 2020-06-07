@@ -28,6 +28,7 @@ class ExpressionCompiler(object):
 	def __init__(self,codeGenerator,identStore):
 		self.cg = codeGenerator
 		self.identStore = identStore
+		self.opTokens = { "+":0,"-":0,"&":0,"^":0,"|":0,"<<":0 }
 	#
 	#		Compile an expression at the given level from the given stream.
 	#		Does not convert to a final value.
@@ -89,13 +90,8 @@ class ExpressionCompiler(object):
 		#			(iii)	conditions (== <>)
 		#			(iv) 	those with special code (>>)
 		#
-		# BODGE FOR TESTING
-		if operator == "-":
-			self.cg.c_sub(regLevel)  
-		elif operator == "+":
-			self.cg.c_add(regLevel)  
-		elif operator == "&":
-			self.cg.c_and(regLevel)  
+		if operator in self.opTokens:
+			self.compileBinaryOperatorOpcode(operator,regLevel)
 
 		return [VType.VALUE]
 	#
@@ -103,6 +99,24 @@ class ExpressionCompiler(object):
 	#
 	def optimiseCalculation(self,current,operator,rightSide,regLevel,termCompiler):
 		return None
+	#
+	#		Compile binary operator opcode
+	#
+	def compileBinaryOperatorOpcode(self,op,reg):
+		if op == "+":
+			self.cg.c_add(reg)
+		elif op == "-":
+			self.cg.c_sub(reg)
+		elif op == "&":
+			self.cg.c_and(reg)
+		elif op == "|":
+			self.cg.c_orr(reg)
+		elif op == "^":
+			self.cg.c_xor(reg)
+		elif op == "<<":
+			self.cg.c_shf(reg)
+		else:
+			assert False
 	#
 	#		Test routine. 
 	#
@@ -134,12 +148,11 @@ if __name__ == "__main__":
 	ec = ExpressionCompiler(codeGen,idStore)
 
 	src = """
-		!d
-		1-(2+3)+4
-		a&b+c-d
-		count+1
+		2&3-count+1
 	""".strip().split("\n")
 
 	stream = TextParser(src)
 	for i in range(0,len(src)):
 		ec.test(stream,tc)
+
+# TO Check: + - & | ^ <<

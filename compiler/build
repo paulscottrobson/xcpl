@@ -1,6 +1,0 @@
-#!/bin/bash
-set -e
-pushd ../runtime
-./build
-popd
-python testcg.py

@@ -99,8 +99,7 @@ class TermCompiler(object):
 				return [VType.CONST,(-value[1]) & 0xFFFF ]
 			else:
 				self.convertToValue(value,regLevel)								# make it a value.
-				self.cg.c_ldi(15,regLevel)										# RF to what we negate
-				self.cg.c_call(Sour16.X_NEGATE)									# negate it.
+				self.negateRegister(regLevel)
 				return [VType.VALUE]
 		else:
 			raise XCPLException("Syntax error "+t)
@@ -113,7 +112,7 @@ class TermCompiler(object):
 		#		Type is constant.
 		#
 		if e[0] == VType.CONST:
-			self.cg.c_ldi(regLevel,e[1])
+			self.loadConstantCode(regLevel,e[1])
 		#
 		#		Type is variable reference.
 		#
@@ -134,6 +133,18 @@ class TermCompiler(object):
 		#
 		elif e[0] == VType.CONDITION:
 			assert False,"Condition conversion TODO"
+	#
+	#		Generate code to load constant
+	#
+	def loadConstantCode(self,reg,n):
+		self.cg.c_lcw(reg,n)
+	#
+	#		Generate code to negate a register
+	#
+	def negateRegister(self,reg):
+		self.loadConstantCode(15,reg)											# RF to what we negate
+		self.cg.c_call(Sour16.X_NEGATE)											# negate it.
+
 	#
 	#		Test routine. Uses self for parenthesis, so (a+b) won't work.
 	#

@@ -52,12 +52,12 @@ VType.TOSTRING = [ "Const","Value","VarRef","ByteRef","WordRef","Condition"]
 
 # *****************************************************************************
 #
-#		 Conditional value. These are ennumerated so -x inverts the test
+#		 						Conditional values
 #
 # *****************************************************************************
 
 class Condition(object):
 	pass
 
-Condition.ZERO = 1
-Condition.NONZERO = -1
+Condition.ZERO = 0
+Condition.NONZERO = 1

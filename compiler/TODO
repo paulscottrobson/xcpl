@@ -1,9 +1,12 @@
 Process:
 
-- Write conditional routines for >= > <= < (== and <> use sub/xor)
+- Test script so we can run with CHZ
+	Check + - & | ^ << work
+	Check * / % work
 - Normalise R1 routine (non-zero to -1/0)
+- Write conditional routines for >= > <= < (== and <> use sub/xor) and check they work
+- Get >> working.
 - Expressions
-- Actually run test code with some sort of assertion ? Add assert (r1 = 0) and break
 - Assignment 
 - Command groups
 - Conditions

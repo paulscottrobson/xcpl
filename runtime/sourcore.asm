@@ -31,7 +31,7 @@ Command_Miscellaneous:
 
 		.align 	16
 
-Command_LoadConst:		;; LDI @,#
+Command_LoadConstWord:		;; LCW @,#
 		lda 	(pctr) 						; copy the first byte in
 		sta 	Vars,X
 		ldy 	#1

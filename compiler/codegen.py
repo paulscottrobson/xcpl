@@ -17,17 +17,7 @@ class CodeGen(object):
 		return self.cg.assemble(opcode,operandSize,operand)
 	def setListHandle(self,handle = sys.stdout):
 		return self.cg.setListHandle(handle)
-	def c_brz(self,operand):
-		return self.cg.assemble(0x01,1,operand)
-	def c_brnz(self,operand):
-		return self.cg.assemble(0x02,1,operand)
-	def c_br(self,operand):
-		return self.cg.assemble(0x03,1,operand)
-	def c_call(self,operand):
-		return self.cg.assemble(0x05,2,operand)
-	def c_ret(self,):
-		return self.cg.assemble(0x08,0)
-	def c_ldi(self,reg,operand):
+	def c_lcw(self,reg,operand):
 		return self.cg.assemble(0x10+reg,2,operand)
 	def c_add(self,reg):
 		return self.cg.assemble(0x20+reg,0)
@@ -51,4 +41,16 @@ class CodeGen(object):
 		return self.cg.assemble(0xb0+reg,2,operand)
 	def c_sia(self,reg):
 		return self.cg.assemble(0xd0+reg,0)
+	def c_brz(self,operand):
+		return self.cg.assemble(0x01,1,operand)
+	def c_brnz(self,operand):
+		return self.cg.assemble(0x02,1,operand)
+	def c_br(self,operand):
+		return self.cg.assemble(0x03,1,operand)
+	def c_chz(self,):
+		return self.cg.assemble(0x05,0)
+	def c_call(self,operand):
+		return self.cg.assemble(0x06,2,operand)
+	def c_ret(self,):
+		return self.cg.assemble(0x09,0)
 	
