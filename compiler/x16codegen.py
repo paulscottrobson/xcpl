@@ -54,6 +54,18 @@ class BaseCodeGenClass(object):
 		if self.uPointer >= self.uLimit:
 			raise XCPLException("Out of uninitialised data memory")
 	#
+	#		Get code pointer
+	#
+	def getCodePointer(self):
+		return self.codePtr
+	#
+	#		Set free memory address.
+	#
+	def updateFreeMemory(self):
+		p = self.getFreeMemoryAddress()
+		self.code[8] = p & 0xFF
+		self.code[9] = (p >> 8) & 0xFF
+	#
 	#		Write a byte to initialised data memory.
 	#
 	def writeDataMemory(self,data):
@@ -66,7 +78,7 @@ class BaseCodeGenClass(object):
 	#		Set the execute address
 	#
 	def setExecuteAddress(self,address):
-		assert address >= self.codeStart and address < self.codePtr
+		assert address >= self.codeStart and address <= self.codePtr
 		self.code[4] = address & 0xFF
 		self.code[5] = (address >> 8) & 0xFF
 	#
@@ -92,12 +104,12 @@ class BaseCodeGenClass(object):
 		if operandSize >= 2:
 			self.write(self.codePtr+2,(operand >> 8) & 0xFF)
 		#
-		if self.listCode:														# code listing.
+		if self.listCode is not None:											# code listing.
 			operand = 0 if operand is None else operand
 			s = [ opcode, operand & 0xFF,(operand >> 8) & 0xFF ][:operandSize+1]
 			s = " ".join(["{0:02x}".format(x) for x in s])
 			op = opcode if (opcode & 0xF0) == (Sour16.BR & 0xF0) else (opcode & 0xF0)
-			c = Sour16.DECODE[op].replace("@","r"+str(opcode & 15)).replace("#","${0:04x}".format(operand))
+			c = Sour16.DECODE[op].replace("@","r"+str(opcode & 15)).replace("#","${0:04x}".format(operand & 0xFFFF))
 			if c.find("+"):
 				a = self.codePtr+1+(operand if (operand & 0x80) == 0 else (operand & 0xFF)-256)
 				c = c.replace("+","${0:04x}".format(a))	
@@ -113,7 +125,16 @@ class BaseCodeGenClass(object):
 	#
 	def setListHandle(self,handle = sys.stdout):
 		self.listCode = handle	
-
+	#
+	#		Write out prg file
+	#
+	def writeProgram(self,fileName):
+		self.updateFreeMemory()													# Update free memory pointer
+		h = open(fileName,"wb")
+		h.write(bytes([self.base & 0xFF,self.base >> 8]))						# Write out position prefix.
+		h.write(bytes(self.code))												# Body
+		h.close()
+		
 # *****************************************************************************
 #
 #							Code Generator (Commander X16)
@@ -131,7 +152,10 @@ class X16CodeGen(BaseCodeGenClass):
 		#
 		self.codePtr = self.uLimit 												# where code actually goes.
 		self.codeLimit = 0x9F00													# where it ends.
-		
+	#
+	def getFreeMemoryAddress(self):
+		return self.codePtr 													# free memory after code.
+
 if __name__ == "__main__":
 	cg = X16CodeGen(1024,1024)
 	cg.assemble(16,2,32765)

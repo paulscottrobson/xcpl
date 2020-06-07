@@ -82,7 +82,8 @@ h.write("class CodeGen(object):\n")
 h.write("\tdef __init__(self,codeGen):\n")
 h.write("\t\tself.cg = codeGen\n")
 #
-#		These are methods exported from the Code Generator.
+#		These are methods exported from the Code Generator Base Class in the compiler.
+#		(You manually copy these in)
 #
 export = """
 	def allocUninitialised(self,size):
@@ -91,6 +92,9 @@ export = """
 	def write(self,address,data):
 	def assemble(self,opcode,operandSize = 0,operand = None):
 	def setListHandle(self,handle = sys.stdout):
+	def getCodePointer(self):
+	def updateFreeMemory(self):
+	def writeProgram(self,fileName):
 """.strip().split(":")
 
 for d in [x.strip() for x in export if x.strip() != ""]:

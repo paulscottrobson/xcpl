@@ -154,5 +154,3 @@ if __name__ == "__main__":
 	stream = TextParser(src)
 	for i in range(0,len(src)):
 		ec.test(stream,tc)
-
-# TO Check: + - & | ^ <<

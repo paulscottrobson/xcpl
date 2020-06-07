@@ -17,6 +17,12 @@ class CodeGen(object):
 		return self.cg.assemble(opcode,operandSize,operand)
 	def setListHandle(self,handle = sys.stdout):
 		return self.cg.setListHandle(handle)
+	def getCodePointer(self):
+		return self.cg.getCodePointer()
+	def updateFreeMemory(self):
+		return self.cg.updateFreeMemory()
+	def writeProgram(self,fileName):
+		return self.cg.writeProgram(fileName)
 	def c_lcw(self,reg,operand):
 		return self.cg.assemble(0x10+reg,2,operand)
 	def c_add(self,reg):
