@@ -1,8 +1,8 @@
 ; *****************************************************************************
 ; *****************************************************************************
 ;
-;		Name:		sourextras.asm
-;		Purpose:	Support routine
+;		Name:		sourmath.asm
+;		Purpose:	Support routines (arithmetic)
 ;		Date: 		4th June 2020
 ;		Author:		Paul Robson (paul@robsons.org.uk)
 ;

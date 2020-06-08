@@ -36,7 +36,9 @@ HighMemory:									; +8 is the first free byte.
 		.include 	"sourmisc.asm"			; miscellaneous functions.
 		.include 	"sourcore.asm"			; core operations
 		.include 	"sourrun.asm" 			; main execution functions
-		.include	"sourextras.asm" 		; extra functionality
+		.include	"sourmath.asm" 			; arithmetic
+		.include 	"sourcompare.asm"		; comparisons
+		
 
 Sour16End:
 

@@ -125,10 +125,10 @@ ReturnSubroutine:	;; RET
 ;
 ; *****************************************************************************
 
+		* = Sour16Base+$F0
+
 MachineCodeCaller:
 		jmp 	(pctr)
-
-		* = Sour16Base+$F7
 
 MiscellaneousHandler:
 		asl 	a 							; on entry, 2 x the LSNibble of the word

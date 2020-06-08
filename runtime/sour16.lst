@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Mon Jun  8 11:21:44 2020
+; Mon Jun  8 13:56:29 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -16,7 +16,7 @@
 .1004					StartVector:
 >1004	00 00 00 00					.word 	0,0
 .1008					HighMemory:
->1008	bb 12						.word 	Sour16End
+>1008	20 13						.word 	Sour16End
 
 ;******  Processing file: sourmisc.asm
 
@@ -76,7 +76,7 @@
 >1074							.align 	16
 .1080					CallMachineCode:
 .1080	a9 08		lda #$08			lda 	#Vars 						; address of variables in A
-.1082	20 99 10	jsr $1099			jsr 	MachineCodeCaller 			; call the calling code.
+.1082	20 f0 10	jsr $10f0			jsr 	MachineCodeCaller 			; call the calling code.
 .1085	80 09		bra $1090			bra 	ReturnSubroutine 			; and do the return code.
 >1087							.align 	16
 .1090					ReturnSubroutine:
@@ -85,15 +85,15 @@
 .1093	68		pla				pla
 .1094	85 29		sta $29				sta 	pctr+1
 .1096	4c 0b 12	jmp $120b			jmp 	Sour16NextSkip2 			; return, skipping the code.
-.1099					MachineCodeCaller:
-.1099	6c 28 00	jmp ($0028)			jmp 	(pctr)
-.10f7					MiscellaneousHandler:
-.10f7	0a		asl a				asl 	a 							; on entry, 2 x the LSNibble of the word
-.10f8	0a		asl a				asl 	a 							; x 4
-.10f9	0a		asl a				asl 	a 							; x 16
-.10fa	8d fe 10	sta $10fe			sta 	MHAddress+1 				; make the LSB of the jump address
-.10fd					MHAddress:
-.10fd	4c f7 10	jmp $10f7			jmp 	MiscellaneousHandler
+.10f0					MachineCodeCaller:
+.10f0	6c 28 00	jmp ($0028)			jmp 	(pctr)
+.10f3					MiscellaneousHandler:
+.10f3	0a		asl a				asl 	a 							; on entry, 2 x the LSNibble of the word
+.10f4	0a		asl a				asl 	a 							; x 4
+.10f5	0a		asl a				asl 	a 							; x 16
+.10f6	8d fa 10	sta $10fa			sta 	MHAddress+1 				; make the LSB of the jump address
+.10f9					MHAddress:
+.10f9	4c f3 10	jmp $10f3			jmp 	MiscellaneousHandler
 
 ;******  Return to file: sour16.asm
 
@@ -102,7 +102,7 @@
 
 .1100					Sour16RootCommandSet:
 .1100					Command_Miscellaneous:
-.1100	80 f5		bra $10f7			bra 	MiscellaneousHandler
+.1100	80 f1		bra $10f3			bra 	MiscellaneousHandler
 >1102							.align 	16
 .1110					Command_LoadConstWord:
 .1110	b2 28		lda ($28)			lda 	(pctr) 						; copy the first byte in
@@ -270,7 +270,7 @@
 ;******  Return to file: sour16.asm
 
 
-;******  Processing file: sourextras.asm
+;******  Processing file: sourmath.asm
 
 =8					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
 .122c					Multiply:
@@ -373,6 +373,89 @@
 
 ;******  Return to file: sour16.asm
 
-.12bb					Sour16End:
+
+;******  Processing file: sourcompare.asm
+
+.12bb					Equals:
+>12bb	08						.byte 	CodeOpcode
+.12bc	18		clc				clc 								; clc keeps the result, sec inverts it
+.12bd	80 02		bra $12c1			bra 	EqualMain
+.12bf					NotEqual:
+>12bf	08						.byte 	CodeOpcode
+.12c0	38		sec				sec
+.12c1					EqualMain:
+.12c1	08		php				php 								; save flip bit
+.12c2	aa		tax				tax 								; save Base in X.
+.12c3	18		clc				clc
+.12c4	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.12c6	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.12c8	aa		tax				tax
+.12c9	b5 00		lda $00,x			lda		0,X 						; check if equals.
+.12cb	d5 02		cmp $02,x			cmp 	2,X
+.12cd	d0 12		bne $12e1			bne 	CondFail
+.12cf	b5 01		lda $01,x			lda 	1,x
+.12d1	d5 03		cmp $03,x			cmp 	3,x
+.12d3	d0 0c		bne $12e1			bne 	CondFail
+.12d5					CondSucceed:
+.12d5	a9 ff		lda #$ff			lda 	#$FF 						; return true.
+.12d7	28		plp				plp
+.12d8	90 02		bcc $12dc			bcc 	CondSaveExit
+.12da	a9 00		lda #$00			lda 	#$00						; if flip return 00
+.12dc					CondSaveExit:
+.12dc	95 00		sta $00,x			sta 	0,x 						; write out 0 or -1
+.12de	95 01		sta $01,x			sta 	1,x
+.12e0	60		rts				rts
+.12e1					CondFail:
+.12e1	a9 00		lda #$00			lda 	#$00 						; return false.
+.12e3	28		plp				plp
+.12e4	90 f6		bcc $12dc			bcc 	CondSaveExit
+.12e6	a9 ff		lda #$ff			lda 	#$FF
+.12e8	80 f2		bra $12dc			bra 	CondSaveExit
+.12ea					GreaterEquals:
+>12ea	08						.byte 	CodeOpcode
+.12eb	18		clc				clc 								; clc keeps the result, sec inverts it
+.12ec	80 02		bra $12f0			bra 	GEqualMain
+.12ee					Less:
+>12ee	08						.byte 	CodeOpcode
+.12ef	38		sec				sec
+.12f0					GEqualMain:
+.12f0	08		php				php 								; save flip bit
+.12f1	aa		tax				tax 								; save Base in X.
+.12f2	18		clc				clc
+.12f3	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.12f5	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.12f7	aa		tax				tax
+.12f8	38		sec				sec 								; do the comparison
+.12f9	b5 00		lda $00,x			lda 	0,X
+.12fb	f5 02		sbc $02,x			sbc 	2,x
+.12fd	b5 01		lda $01,x			lda 	1,x
+.12ff	f5 03		sbc $03,x			sbc		3,x
+.1301	b0 d2		bcs $12d5			bcs 	CondSucceed 				; >= true
+.1303	80 dc		bra $12e1			bra 	CondFail 					; < false
+.1305					Greater:
+>1305	08						.byte 	CodeOpcode
+.1306	18		clc				clc 								; clc keeps the result, sec inverts it
+.1307	80 02		bra $130b			bra 	GMain
+.1309					LessEqual:
+>1309	08						.byte 	CodeOpcode
+.130a	38		sec				sec
+.130b					GMain:
+.130b	08		php				php 								; save flip bit
+.130c	aa		tax				tax 								; save Base in X.
+.130d	18		clc				clc
+.130e	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.1310	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1312	aa		tax				tax
+.1313	38		sec				sec 								; do the comparison
+.1314	b5 02		lda $02,x			lda 	2,X
+.1316	f5 00		sbc $00,x			sbc 	0,x
+.1318	b5 03		lda $03,x			lda 	3,x
+.131a	f5 01		sbc $01,x			sbc		1,x
+.131c	90 b7		bcc $12d5			bcc 	CondSucceed 				; >= true
+.131e	80 c1		bra $12e1			bra 	CondFail 					; < false
+
+;******  Return to file: sour16.asm
+
+.1320					Sour16End:
 
 ;******  End of listing

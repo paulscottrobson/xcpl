@@ -1,8 +1,9 @@
 Process:
 
-- Write conditional routines for >= > <= < == <> and Test
 - Set up some variables in initialised memory & check.
-- Expressions
+- Short load constant
+- Expressions (complete)
+
 - Assignment 
 - Command groups
 - Conditions

@@ -29,7 +29,10 @@ class ExpressionCompiler(object):
 		self.cg = codeGenerator
 		self.identStore = identStore
 		self.opTokens = { "+":0,"-":0,"&":0,"^":0,"|":0,"<<":0 }
-		self.rtTokens = { "*":Sour16.X_MULTIPLY,"/":Sour16.X_DIVIDE,"%":Sour16.X_MODULUS }
+		self.rtTokens = { "*":Sour16.X_MULTIPLY,"/":Sour16.X_DIVIDE,"%":Sour16.X_MODULUS,
+						  "==":Sour16.X_EQUAL,"<>":Sour16.X_NOTEQUAL,
+						  ">=":Sour16.X_GREATEREQUAL,"<":Sour16.X_LESS,
+						  "<=":Sour16.X_LESSEQUAL,">":Sour16.X_GREATER }
 	#
 	#		Compile an expression at the given level from the given stream.
 	#		Does not convert to a final value.
