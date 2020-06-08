@@ -109,7 +109,9 @@ class BaseCodeGenClass(object):
 			s = [ opcode, operand & 0xFF,(operand >> 8) & 0xFF ][:operandSize+1]
 			s = " ".join(["{0:02x}".format(x) for x in s])
 			op = opcode if (opcode & 0xF0) == (Sour16.BR & 0xF0) else (opcode & 0xF0)
-			c = Sour16.DECODE[op].replace("@","r"+str(opcode & 15)).replace("#","${0:04x}".format(operand & 0xFFFF))
+			c = Sour16.DECODE[op].replace("@","r"+str(opcode & 15))
+			c = c.replace("#","${0:04x}".format(operand & 0xFFFF))
+			c = c.replace("%","${0:04x}".format(operand & 0xFF))
 			if c.find("+"):
 				a = self.codePtr+1+(operand if (operand & 0x80) == 0 else (operand & 0xFF)-256)
 				c = c.replace("+","${0:04x}".format(a))	

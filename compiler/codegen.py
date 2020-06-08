@@ -25,28 +25,30 @@ class CodeGen(object):
 		return self.cg.writeProgram(fileName)
 	def c_lcw(self,reg,operand):
 		return self.cg.assemble(0x10+reg,2,operand)
+	def c_lcb(self,reg,operand):
+		return self.cg.assemble(0x20+reg,1,operand)
 	def c_add(self,reg):
-		return self.cg.assemble(0x20+reg,0)
-	def c_sub(self,reg):
 		return self.cg.assemble(0x30+reg,0)
-	def c_and(self,reg):
+	def c_sub(self,reg):
 		return self.cg.assemble(0x40+reg,0)
-	def c_orr(self,reg):
+	def c_and(self,reg):
 		return self.cg.assemble(0x50+reg,0)
-	def c_xor(self,reg):
+	def c_orr(self,reg):
 		return self.cg.assemble(0x60+reg,0)
-	def c_sbi(self,reg):
+	def c_xor(self,reg):
 		return self.cg.assemble(0x70+reg,0)
-	def c_lwi(self,reg):
+	def c_sbi(self,reg):
 		return self.cg.assemble(0x80+reg,0)
-	def c_lbi(self,reg):
+	def c_lwi(self,reg):
 		return self.cg.assemble(0x90+reg,0)
-	def c_shf(self,reg):
+	def c_lbi(self,reg):
 		return self.cg.assemble(0xa0+reg,0)
+	def c_shf(self,reg):
+		return self.cg.assemble(0xb0+reg,0)
 	def c_ldr(self,reg,operand):
-		return self.cg.assemble(0xb0+reg,2,operand)
+		return self.cg.assemble(0xc0+reg,2,operand)
 	def c_sia(self,reg):
-		return self.cg.assemble(0xd0+reg,0)
+		return self.cg.assemble(0xe0+reg,0)
 	def c_brz(self,operand):
 		return self.cg.assemble(0x01,1,operand)
 	def c_brnz(self,operand):

@@ -112,7 +112,7 @@ for k in disasm.keys():
 	if mnemonic.find("@") >= 0:
 		parameters.append("reg")
 		opcode = opcode + "+reg"
-	if mnemonic.find("+") >= 0:
+	if mnemonic.find("+") >= 0 or mnemonic.find("%") >= 0:
 		paramCount = 1
 		parameters.append("operand")		
 	if mnemonic.find("#") >= 0:

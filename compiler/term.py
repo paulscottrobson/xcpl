@@ -137,7 +137,11 @@ class TermCompiler(object):
 	#		Generate code to load constant
 	#
 	def loadConstantCode(self,reg,n):
-		self.cg.c_lcw(reg,n)
+		n = n & 0xFFFF
+		if n >= 256:
+			self.cg.c_lcw(reg,n)
+		else:
+			self.cg.c_lcb(reg,n)
 	#
 	#		Generate code to negate a register
 	#

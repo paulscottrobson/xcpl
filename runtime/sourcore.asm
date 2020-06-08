@@ -25,7 +25,7 @@ Command_Miscellaneous:
 
 ; *****************************************************************************
 ;
-;							Load Constant to Register
+;							Load Constant Word to Register
 ;
 ; *****************************************************************************
 
@@ -38,6 +38,24 @@ Command_LoadConstWord:		;; LCW @,#
 		lda 	(pctr),y 					; copy the second byte in
 		sta 	Vars+1,X
 		jmp 	Sour16NextSkip2 			; return skipping 2.
+
+; *****************************************************************************
+;
+;							Load Constant Byte to Register
+;
+; *****************************************************************************
+
+		.align 	16
+
+Command_LoadConstByte:		;; LCB @,%
+		lda 	(pctr) 						; copy the byte in
+		sta 	Vars,X
+		stz 	Vars+1,X 					; zero the MSB.
+		inc 	pctr 						; skip opcode
+		bcc 	_CLCBNoCarry
+		inc 	pctr+1
+_CLCBNoCarry:		
+		jmp 	Sour16Next 					; return
 
 ; *****************************************************************************
 ;
@@ -193,7 +211,7 @@ Shift_None:
 
 ; *****************************************************************************
 ;
-;							Load Direct
+;									Load Direct
 ;
 ; *****************************************************************************
 
