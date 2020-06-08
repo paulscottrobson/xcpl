@@ -131,8 +131,8 @@ class TermCompiler(object):
 		#
 		#		Type is condition
 		#
-		elif e[0] == VType.CONDITION:
-			assert False,"Condition conversion TODO"
+		elif e[0] != VType.VALUE:
+			assert False
 	#
 	#		Generate code to load constant
 	#

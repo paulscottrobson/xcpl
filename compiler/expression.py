@@ -87,8 +87,8 @@ class ExpressionCompiler(object):
 		#
 		#		Generate the appropriate code and return the value. There are three types here
 		#			(i) 	those supported by the opcodes directly (+ - & | ^ <<)
-		#			(ii) 	those supported by utility functions (* / % >= < > <=)
-		#			(iii)	everything else : conditions (== <>)special code (>>)
+		#			(ii) 	those supported by utility functions (* / % >= < > <= == <>)
+		#			(iii)	everything else : special code (>>)
 		#
 		if operator in self.opTokens:
 			return self.compileBinaryOperatorOpcode(operator,regLevel)
@@ -143,7 +143,9 @@ class ExpressionCompiler(object):
 		if op == ">>":
 			termCompiler.negateRegister(reg+1)
 			self.cg.c_shf(reg)
-		return [VType.VALUE]
+			return [VType.VALUE]
+		#
+		assert False
 	#
 	#		Test routine. 
 	#

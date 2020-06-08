@@ -68,7 +68,7 @@ AssertCmd: 				;; CHZ
 		.byte 	$FF 						; if non zero break the emulator
 AssertOkay:
 		jmp 	Sour16Next	
-			
+
 ; *****************************************************************************
 ;
 ;								Call subroutine

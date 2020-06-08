@@ -40,24 +40,5 @@ VType.VARREF = 2
 #
 VType.BYTEREF = 3
 VType.WORDREF = 4
-#
-#		A condition. This is returned after a comparison to indicate that
-#		there is an in-progress test state. The value returned is the test to 
-#		indicate truth. This can either be used in a condition or converted to a 
-#		true or false value depending on its usage.
-#
-VType.CONDITION = 5
 
-VType.TOSTRING = [ "Const","Value","VarRef","ByteRef","WordRef","Condition"]
-
-# *****************************************************************************
-#
-#		 						Conditional values
-#
-# *****************************************************************************
-
-class Condition(object):
-	pass
-
-Condition.ZERO = 0
-Condition.NONZERO = 1
+VType.TOSTRING = [ "Const","Value","VarRef","ByteRef","WordRef"]

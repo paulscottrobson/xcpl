@@ -39,8 +39,12 @@ src = """
 		12345 >> 2 => 3086
 		(2+3)*4 => 20
 		(2+3)*(4+5) => 45
+#		4==4 => -1
+#		4==5 => 0
+#		4<>4 => 0
+#		4<>5 => -1
 """.strip().split("\n")
-src = [x.strip() for x in src if x.strip() != ""]
+src = [x.strip() for x in src if x.strip() != "" and not x.startswith("#")]
 for i in range(0,len(src)):
 	m = re.match("^\\s*(.*?)\\s*\\=\\>\\s*(.*?)\\s*$",src[i])
 	assert m is not None,src[i]
@@ -55,7 +59,9 @@ for i in range(0,len(src)):
 	print(">>>>>> "+src[i])
 	ec.test(stream,tc)
 	codeGen.c_chz()
-print("Patch XEQ ; JMP $FFFF")
+#
+#		Code : run 6502, Write a xx $FFFF and the make that $4CFFFF e.g. crash and dump.
+#
 codeGen.c_xeq()
 p = codeGen.getCodePointer()
 codeGen.c_lcw(0,0xFFFF)

@@ -1,8 +1,6 @@
 Process:
 
-- Normalise R1 routine (non-zero to -1/0)
-- Test == <>
-- Write conditional routines for >= > <= < and Test
+- Write conditional routines for >= > <= < == <> and Test
 - Set up some variables in initialised memory & check.
 - Expressions
 - Assignment 
