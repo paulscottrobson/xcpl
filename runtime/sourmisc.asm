@@ -89,22 +89,6 @@ CallSubroutine: 		;; CALL #
 		stx 	pctr
 		jmp 	Sour16Next 					; and execute from there.
 
-
-; *****************************************************************************
-;
-;							Call following machine code.
-;
-;	This calls the code following the opcode, and when that code returns
-;	it does a Subroutine Return.
-;
-; *****************************************************************************
-
-		.align 	16
-CallMachineCode:		;; XEQ
-		lda 	#Vars 						; address of variables in A
-		jsr 	MachineCodeCaller 			; call the calling code.
-		bra 	ReturnSubroutine 			; and do the return code.
-
 ; *****************************************************************************
 ;
 ;								Return code
@@ -119,16 +103,33 @@ ReturnSubroutine:	;; RET
 		sta 	pctr+1
 		jmp 	Sour16NextSkip2 			; return, skipping the code.
 
+MachineCodeCaller:							; part of XEQ
+		jmp 	(pctr)
+
+
 ; *****************************************************************************
 ;
-;					Handler for miscellaneous code
+;							Call following machine code.
+;
+;	This calls the code following the opcode, and when that code returns
+;	it does a Subroutine Return.
 ;
 ; *****************************************************************************
 
 		* = Sour16Base+$F0
 
-MachineCodeCaller:
-		jmp 	(pctr)
+CallMachineCode:		;; XEQ
+		lda 	#Vars 						; address of variables in A
+		jsr 	MachineCodeCaller 			; call the calling code.
+		bra 	ReturnSubroutine 			; and do the return code.
+
+; *****************************************************************************
+;
+;				Dispatcher for miscellaneous code / BREAK
+;
+; *****************************************************************************
+
+		* = Sour16Base+$F7
 
 MiscellaneousHandler:
 		asl 	a 							; on entry, 2 x the LSNibble of the word

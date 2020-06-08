@@ -17,10 +17,19 @@ from term import *
 from sour16 import *
 from expression import *
 
+def createVariable(codeGen,store,name,value):
+	addr = codeGen.writeDataMemory(value & 0xFF)
+	codeGen.writeDataMemory(value >> 8)
+	store.set(True,name,addr)
+
 codeGen = CodeGen(X16CodeGen(1024,1024))		
 idStore = TestIdentStore()
 tc = TermCompiler(codeGen,idStore)				
 ec = ExpressionCompiler(codeGen,idStore)
+
+createVariable(codeGen,idStore,"demo1",0x12A9)
+createVariable(codeGen,idStore,"a3",3)
+createVariable(codeGen,idStore,"b2",2)
 
 src = """
 		12345+1000 => 13345 : 12345-1000 => 11345
@@ -41,6 +50,9 @@ src = """
 		3<=4 => -1 : 4<=4 => -1: 5<4 => 0
 		3>4 => 0 : 4>4 => 0: 5>4 => -1
 
+		demo1 => $12A9
+		(a3+b2)*5 => 25
+		
 """.replace(":","\n").strip().split("\n")
 src = [x.strip() for x in src if x.strip() != "" and not x.startswith("#")]
 for i in range(0,len(src)):

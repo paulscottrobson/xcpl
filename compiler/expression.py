@@ -40,6 +40,12 @@ class ExpressionCompiler(object):
 	def compile(self,stream,regLevel,termCompiler):
 		return self.compileAtPrecedenceLevel(0,stream,regLevel,termCompiler)
 	#
+	#		Compile and dereference/complete so it is an actual value stored.
+	#
+	def compileValue(self,stream,regLevel,termCompiler):
+		r = self.compile(stream,regLevel,termCompiler)
+		termCompiler.convertToValue(r)
+	#
 	#		Compiles at a specific precedence level.
 	#
 	def compileAtPrecedenceLevel(self,precedence,stream,regLevel,termCompiler):
@@ -186,3 +192,4 @@ if __name__ == "__main__":
 	stream = TextParser(src)
 	for i in range(0,len(src)):
 		ec.test(stream,tc)
+

@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Mon Jun  8 14:06:49 2020
+; Mon Jun  8 16:01:20 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -74,26 +74,25 @@
 .106f	86 28		stx $28				stx 	pctr
 .1071	4c 26 12	jmp $1226			jmp 	Sour16Next 					; and execute from there.
 >1074							.align 	16
-.1080					CallMachineCode:
-.1080	a9 08		lda #$08			lda 	#Vars 						; address of variables in A
-.1082	20 f0 10	jsr $10f0			jsr 	MachineCodeCaller 			; call the calling code.
-.1085	80 09		bra $1090			bra 	ReturnSubroutine 			; and do the return code.
->1087							.align 	16
-.1090					ReturnSubroutine:
-.1090	68		pla				pla 								; restore PC
-.1091	85 28		sta $28				sta 	pctr
-.1093	68		pla				pla
-.1094	85 29		sta $29				sta 	pctr+1
-.1096	4c 1b 12	jmp $121b			jmp 	Sour16NextSkip2 			; return, skipping the code.
-.10f0					MachineCodeCaller:
-.10f0	6c 28 00	jmp ($0028)			jmp 	(pctr)
-.10f3					MiscellaneousHandler:
-.10f3	0a		asl a				asl 	a 							; on entry, 2 x the LSNibble of the word
-.10f4	0a		asl a				asl 	a 							; x 4
-.10f5	0a		asl a				asl 	a 							; x 16
-.10f6	8d fa 10	sta $10fa			sta 	MHAddress+1 				; make the LSB of the jump address
-.10f9					MHAddress:
-.10f9	4c f3 10	jmp $10f3			jmp 	MiscellaneousHandler
+.1080					ReturnSubroutine:
+.1080	68		pla				pla 								; restore PC
+.1081	85 28		sta $28				sta 	pctr
+.1083	68		pla				pla
+.1084	85 29		sta $29				sta 	pctr+1
+.1086	4c 1b 12	jmp $121b			jmp 	Sour16NextSkip2 			; return, skipping the code.
+.1089					MachineCodeCaller:
+.1089	6c 28 00	jmp ($0028)			jmp 	(pctr)
+.10f0					CallMachineCode:
+.10f0	a9 08		lda #$08			lda 	#Vars 						; address of variables in A
+.10f2	20 89 10	jsr $1089			jsr 	MachineCodeCaller 			; call the calling code.
+.10f5	80 89		bra $1080			bra 	ReturnSubroutine 			; and do the return code.
+.10f7					MiscellaneousHandler:
+.10f7	0a		asl a				asl 	a 							; on entry, 2 x the LSNibble of the word
+.10f8	0a		asl a				asl 	a 							; x 4
+.10f9	0a		asl a				asl 	a 							; x 16
+.10fa	8d fe 10	sta $10fe			sta 	MHAddress+1 				; make the LSB of the jump address
+.10fd					MHAddress:
+.10fd	4c f7 10	jmp $10f7			jmp 	MiscellaneousHandler
 
 ;******  Return to file: sour16.asm
 
@@ -102,7 +101,7 @@
 
 .1100					Sour16RootCommandSet:
 .1100					Command_Miscellaneous:
-.1100	80 f1		bra $10f3			bra 	MiscellaneousHandler
+.1100	80 f5		bra $10f7			bra 	MiscellaneousHandler
 >1102							.align 	16
 .1110					Command_LoadConstWord:
 .1110	b2 28		lda ($28)			lda 	(pctr) 						; copy the first byte in
@@ -282,9 +281,9 @@
 
 ;******  Processing file: sourmath.asm
 
-=8					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
+=15					CodeOpcode = (CallMachineCode-Sour16Base) >> 4
 .123c					Multiply:
->123c	08						.byte 	CodeOpcode
+>123c	0f						.byte 	CodeOpcode
 .123d	aa		tax				tax 								; save Base in X.
 .123e	18		clc				clc
 .123f	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
@@ -317,7 +316,7 @@
 .126f	95 01		sta $01,x			sta 	1,x
 .1271	60		rts				rts
 .1272					Negate:
->1272	08						.byte 	CodeOpcode
+>1272	0f						.byte 	CodeOpcode
 .1273	aa		tax				tax 								; save Base in X.
 .1274	18		clc				clc
 .1275	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
@@ -332,11 +331,11 @@
 .1285	95 01		sta $01,x			sta 	1,x
 .1287	60		rts				rts
 .1288					Divide:
->1288	08						.byte 	CodeOpcode
+>1288	0f						.byte 	CodeOpcode
 .1289	38		sec				sec
 .128a	80 02		bra $128e			bra 	DivideModulus
 .128c					Modulus:
->128c	08						.byte 	CodeOpcode
+>128c	0f						.byte 	CodeOpcode
 .128d	18		clc				clc
 .128e					DivideModulus:
 .128e	08		php				php
@@ -387,11 +386,11 @@
 ;******  Processing file: sourcompare.asm
 
 .12cb					Equals:
->12cb	08						.byte 	CodeOpcode
+>12cb	0f						.byte 	CodeOpcode
 .12cc	18		clc				clc 								; clc keeps the result, sec inverts it
 .12cd	80 02		bra $12d1			bra 	EqualMain
 .12cf					NotEqual:
->12cf	08						.byte 	CodeOpcode
+>12cf	0f						.byte 	CodeOpcode
 .12d0	38		sec				sec
 .12d1					EqualMain:
 .12d1	08		php				php 								; save flip bit
@@ -422,11 +421,11 @@
 .12f6	a9 ff		lda #$ff			lda 	#$FF
 .12f8	80 f2		bra $12ec			bra 	CondSaveExit
 .12fa					GreaterEquals:
->12fa	08						.byte 	CodeOpcode
+>12fa	0f						.byte 	CodeOpcode
 .12fb	18		clc				clc 								; clc keeps the result, sec inverts it
 .12fc	80 02		bra $1300			bra 	GEqualMain
 .12fe					Less:
->12fe	08						.byte 	CodeOpcode
+>12fe	0f						.byte 	CodeOpcode
 .12ff	38		sec				sec
 .1300					GEqualMain:
 .1300	08		php				php 								; save flip bit
@@ -443,11 +442,11 @@
 .1311	b0 d2		bcs $12e5			bcs 	CondSucceed 				; >= true
 .1313	80 dc		bra $12f1			bra 	CondFail 					; < false
 .1315					Greater:
->1315	08						.byte 	CodeOpcode
+>1315	0f						.byte 	CodeOpcode
 .1316	18		clc				clc 								; clc keeps the result, sec inverts it
 .1317	80 02		bra $131b			bra 	GMain
 .1319					LessEqual:
->1319	08						.byte 	CodeOpcode
+>1319	0f						.byte 	CodeOpcode
 .131a	38		sec				sec
 .131b					GMain:
 .131b	08		php				php 								; save flip bit
