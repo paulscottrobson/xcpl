@@ -79,4 +79,3 @@ codeGen.write(p,0x4C)
 codeEnd = codeGen.getCodePointer()
 print("Code ends at ${0:04x} {1} bytes".format(codeEnd,codeEnd-codeStart))
 codeGen.writeProgram("test.prg")
-# TO Check: + - & | ^ <<

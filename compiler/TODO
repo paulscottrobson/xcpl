@@ -1,10 +1,16 @@
 Process:
 
-- Assignment 
-- Command groups
-- Conditions
-- Procedure invocation
-- Procedure definition
-- Variable definition
+Instruction
+	- Assignment (3 types of indirection)
+	- Variable definition (allocate memory,data ?) - make it work outside.
+	- Command groups
+	- Conditions
+	- Loops
+	- Procedure invocation
+
+Code 
+- Procedure declaration (execute last defined)
+- Variable declaration (global)
+- Some parameter count check ???
 
 
