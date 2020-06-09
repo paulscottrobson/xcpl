@@ -44,7 +44,7 @@ class ExpressionCompiler(object):
 	#
 	def compileValue(self,stream,regLevel,termCompiler):
 		r = self.compile(stream,regLevel,termCompiler)
-		termCompiler.convertToValue(r)
+		termCompiler.convertToValue(r,regLevel)
 	#
 	#		Compiles at a specific precedence level.
 	#

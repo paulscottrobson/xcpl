@@ -1,16 +1,17 @@
 Process:
 
 Instruction
-	- Assignment (3 types of indirection)
-	- Variable definition (allocate memory,data ?) - make it work outside.
+	- Test Assignment (4 types of indirection, direct)
 	- Command groups
-	- Conditions
-	- Loops
+	- Variable definition (allocate memory,data ?) - make it work outside.
+	- Conditions (if .. else)
+	- Loops (while .... some form of repeat loop
 	- Procedure invocation
 
 Code 
 - Procedure declaration (execute last defined)
 - Variable declaration (global)
 - Some parameter count check ???
+- Add ++ and --
 
 
