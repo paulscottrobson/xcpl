@@ -76,7 +76,7 @@ for k in keys:
 
 h.write("\nSour16.DECODE = {0}\n".format(str(disasm)))
 r = ",".join(['"{0}":0x{1:04x}'.format(r,routines[r]) for r in routines.keys()])
-h.write("\nSour16.ROUTINES = [ {0} ]\n".format(r))
+h.write("\nSour16.ROUTINES = {{	 {0} }}\n".format(r))
 h.write("\nSour16.RUNTIME = [ {0} ]\n".format(",".join(["0x{0:02x}".format(c) for c in runTime])))
 h.close()
 #
