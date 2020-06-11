@@ -24,21 +24,22 @@ class IdentStore(object):
 	#
 	#		Set a value
 	#
-	def set(self,isGlobal,identifier,value):
+	def set(self,isGlobal,identifier,value,assoc = None):
 		identifier = identifier.strip().lower()
 		st = self.globals if isGlobal else self.locals 
 		if identifier in st:
 			raise XCPLException("Duplicate identifier "+identifier)
-		st[identifier] = value 
+		st[identifier] = [value,assoc]
 	#
-	#		Get a value
+	#		Get a value/associated value
 	#
-	def get(self,identifier):
+	def get(self,identifier,assoc = False):
+		index = 1 if assoc else False
 		identifier = identifier.strip().lower()
 		if identifier in self.locals:
-			return self.locals[identifier]
+			return self.locals[identifier][index]
 		if identifier in self.globals:
-			return self.globals[identifier]
+			return self.globals[identifier][index]
 		return None
 	#
 	#		Clear the locals

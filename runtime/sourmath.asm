@@ -152,3 +152,33 @@ _DivideNext:
 
 _DivideExit:		
 		rts				
+
+; *****************************************************************************
+;
+;					Increment and Read/Decrement and Read R1
+;
+; *****************************************************************************
+
+IncrementLoad:	;; [INCLOAD]
+		.byte 	CodeOpcode
+		lda 	#1 							; XA is value to add
+		ldx 	#0
+		bra 	ModLoad
+DecrementLoad:	;; [DECLOAD]		
+		.byte 	CodeOpcode
+		lda 	#$FF
+		tax
+ModLoad:
+		clc 								; bump the value
+		adc 	(Vars+2)							
+		sta 	(Vars+2)
+		pha
+		txa
+		ldy 	#1
+		adc 	(Vars+2),y		
+		sta 	(Vars+2),y
+		sta 	Vars+3						; save into R1
+		pla
+		sta 	Vars+2
+		rts
+		

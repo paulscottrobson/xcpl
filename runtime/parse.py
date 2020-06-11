@@ -66,13 +66,16 @@ h.write("#\n#\tAutomatically generated.\n#\n")
 h.write("class Sour16(object):\n\tpass\n\n")
 for k in keys:
 	s = k
+	show = True
 	if k.startswith("["):
 		s = "X_"+k[1:-1] 
-		if k[-2] >= '0' and k[-2] <= '9':
+		if s[-1] >= '0' and s[-1] <= '9':
 			routines[k[1:-1]] = constants[k]
+			show = False
 	if k == "loadaddr":
-		h.write("\n")
-	h.write("Sour16.{0} = 0x{1:02x}\n".format(s.upper(),constants[k]))
+		h.write("\n")	
+	if show:
+		h.write("Sour16.{0} = 0x{1:02x}\n".format(s.upper(),constants[k]))
 
 h.write("\nSour16.DECODE = {0}\n".format(str(disasm)))
 r = ",".join(['"{0}":0x{1:04x}'.format(r,routines[r]) for r in routines.keys()])

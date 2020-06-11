@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Thu Jun 11 13:28:33 2020
+; Thu Jun 11 18:57:22 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -16,7 +16,7 @@
 .1004					StartVector:
 >1004	00 00 00 00					.word 	0,0
 .1008					HighMemory:
->1008	37 13						.word 	Sour16End
+>1008	77 13						.word 	Sour16End
 
 ;******  Processing file: sourmisc.asm
 
@@ -379,103 +379,148 @@
 .12c8	95 01		sta $01,x			sta 	1,x
 .12ca					_DivideExit:
 .12ca	60		rts				rts
+.12cb					IncrementLoad:
+>12cb	0f						.byte 	CodeOpcode
+.12cc	a9 01		lda #$01			lda 	#1 							; XA is value to add
+.12ce	a2 00		ldx #$00			ldx 	#0
+.12d0	80 04		bra $12d6			bra 	ModLoad
+.12d2					DecrementLoad:
+>12d2	0f						.byte 	CodeOpcode
+.12d3	a9 ff		lda #$ff			lda 	#$FF
+.12d5	aa		tax				tax
+.12d6					ModLoad:
+.12d6	18		clc				clc 								; bump the value
+.12d7	72 0a		adc ($0a)			adc 	(Vars+2)
+.12d9	92 0a		sta ($0a)			sta 	(Vars+2)
+.12db	48		pha				pha
+.12dc	8a		txa				txa
+.12dd	a0 01		ldy #$01			ldy 	#1
+.12df	71 0a		adc ($0a),y			adc 	(Vars+2),y
+.12e1	91 0a		sta ($0a),y			sta 	(Vars+2),y
+.12e3	85 0b		sta $0b				sta 	Vars+3						; save into R1
+.12e5	68		pla				pla
+.12e6	85 0a		sta $0a				sta 	Vars+2
+.12e8	60		rts				rts
 
 ;******  Return to file: sour16.asm
 
 
 ;******  Processing file: sourcompare.asm
 
-.12cb					Equals:
->12cb	0f						.byte 	CodeOpcode
-.12cc	18		clc				clc 								; clc keeps the result, sec inverts it
-.12cd	80 02		bra $12d1			bra 	EqualMain
-.12cf					NotEqual:
->12cf	0f						.byte 	CodeOpcode
-.12d0	38		sec				sec
-.12d1					EqualMain:
-.12d1	08		php				php 								; save flip bit
-.12d2	aa		tax				tax 								; save Base in X.
-.12d3	18		clc				clc
-.12d4	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
-.12d6	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
-.12d8	aa		tax				tax
-.12d9	b5 00		lda $00,x			lda		0,X 						; check if equals.
-.12db	d5 02		cmp $02,x			cmp 	2,X
-.12dd	d0 12		bne $12f1			bne 	CondFail
-.12df	b5 01		lda $01,x			lda 	1,x
-.12e1	d5 03		cmp $03,x			cmp 	3,x
-.12e3	d0 0c		bne $12f1			bne 	CondFail
-.12e5					CondSucceed:
-.12e5	a9 ff		lda #$ff			lda 	#$FF 						; return true.
-.12e7	28		plp				plp
-.12e8	90 02		bcc $12ec			bcc 	CondSaveExit
-.12ea	a9 00		lda #$00			lda 	#$00						; if flip return 00
-.12ec					CondSaveExit:
-.12ec	95 00		sta $00,x			sta 	0,x 						; write out 0 or -1
-.12ee	95 01		sta $01,x			sta 	1,x
-.12f0	60		rts				rts
-.12f1					CondFail:
-.12f1	a9 00		lda #$00			lda 	#$00 						; return false.
-.12f3	28		plp				plp
-.12f4	90 f6		bcc $12ec			bcc 	CondSaveExit
-.12f6	a9 ff		lda #$ff			lda 	#$FF
-.12f8	80 f2		bra $12ec			bra 	CondSaveExit
-.12fa					GreaterEquals:
->12fa	0f						.byte 	CodeOpcode
-.12fb	18		clc				clc 								; clc keeps the result, sec inverts it
-.12fc	80 02		bra $1300			bra 	GEqualMain
-.12fe					Less:
->12fe	0f						.byte 	CodeOpcode
-.12ff	38		sec				sec
-.1300					GEqualMain:
-.1300	08		php				php 								; save flip bit
-.1301	aa		tax				tax 								; save Base in X.
-.1302	18		clc				clc
-.1303	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
-.1305	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
-.1307	aa		tax				tax
-.1308	38		sec				sec 								; do the comparison
-.1309	b5 00		lda $00,x			lda 	0,X
-.130b	f5 02		sbc $02,x			sbc 	2,x
-.130d	b5 01		lda $01,x			lda 	1,x
-.130f	f5 03		sbc $03,x			sbc		3,x
-.1311	b0 d2		bcs $12e5			bcs 	CondSucceed 				; >= true
-.1313	80 dc		bra $12f1			bra 	CondFail 					; < false
-.1315					Greater:
->1315	0f						.byte 	CodeOpcode
-.1316	18		clc				clc 								; clc keeps the result, sec inverts it
-.1317	80 02		bra $131b			bra 	GMain
-.1319					LessEqual:
->1319	0f						.byte 	CodeOpcode
-.131a	38		sec				sec
-.131b					GMain:
-.131b	08		php				php 								; save flip bit
-.131c	aa		tax				tax 								; save Base in X.
-.131d	18		clc				clc
-.131e	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
-.1320	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
-.1322	aa		tax				tax
-.1323	38		sec				sec 								; do the comparison
-.1324	b5 02		lda $02,x			lda 	2,X
-.1326	f5 00		sbc $00,x			sbc 	0,x
-.1328	b5 03		lda $03,x			lda 	3,x
-.132a	f5 01		sbc $01,x			sbc		1,x
-.132c	90 b7		bcc $12e5			bcc 	CondSucceed 				; >= true
-.132e	80 c1		bra $12f1			bra 	CondFail 					; < false
+.12e9					Equals:
+>12e9	0f						.byte 	CodeOpcode
+.12ea	18		clc				clc 								; clc keeps the result, sec inverts it
+.12eb	80 02		bra $12ef			bra 	EqualMain
+.12ed					NotEqual:
+>12ed	0f						.byte 	CodeOpcode
+.12ee	38		sec				sec
+.12ef					EqualMain:
+.12ef	08		php				php 								; save flip bit
+.12f0	aa		tax				tax 								; save Base in X.
+.12f1	18		clc				clc
+.12f2	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.12f4	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.12f6	aa		tax				tax
+.12f7	b5 00		lda $00,x			lda		0,X 						; check if equals.
+.12f9	d5 02		cmp $02,x			cmp 	2,X
+.12fb	d0 12		bne $130f			bne 	CondFail
+.12fd	b5 01		lda $01,x			lda 	1,x
+.12ff	d5 03		cmp $03,x			cmp 	3,x
+.1301	d0 0c		bne $130f			bne 	CondFail
+.1303					CondSucceed:
+.1303	a9 ff		lda #$ff			lda 	#$FF 						; return true.
+.1305	28		plp				plp
+.1306	90 02		bcc $130a			bcc 	CondSaveExit
+.1308	a9 00		lda #$00			lda 	#$00						; if flip return 00
+.130a					CondSaveExit:
+.130a	95 00		sta $00,x			sta 	0,x 						; write out 0 or -1
+.130c	95 01		sta $01,x			sta 	1,x
+.130e	60		rts				rts
+.130f					CondFail:
+.130f	a9 00		lda #$00			lda 	#$00 						; return false.
+.1311	28		plp				plp
+.1312	90 f6		bcc $130a			bcc 	CondSaveExit
+.1314	a9 ff		lda #$ff			lda 	#$FF
+.1316	80 f2		bra $130a			bra 	CondSaveExit
+.1318					GreaterEquals:
+>1318	0f						.byte 	CodeOpcode
+.1319	18		clc				clc 								; clc keeps the result, sec inverts it
+.131a	80 02		bra $131e			bra 	GEqualMain
+.131c					Less:
+>131c	0f						.byte 	CodeOpcode
+.131d	38		sec				sec
+.131e					GEqualMain:
+.131e	08		php				php 								; save flip bit
+.131f	aa		tax				tax 								; save Base in X.
+.1320	18		clc				clc
+.1321	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.1323	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1325	aa		tax				tax
+.1326	38		sec				sec 								; do the comparison
+.1327	b5 00		lda $00,x			lda 	0,X
+.1329	f5 02		sbc $02,x			sbc 	2,x
+.132b	b5 01		lda $01,x			lda 	1,x
+.132d	f5 03		sbc $03,x			sbc		3,x
+.132f	b0 d2		bcs $1303			bcs 	CondSucceed 				; >= true
+.1331	80 dc		bra $130f			bra 	CondFail 					; < false
+.1333					Greater:
+>1333	0f						.byte 	CodeOpcode
+.1334	18		clc				clc 								; clc keeps the result, sec inverts it
+.1335	80 02		bra $1339			bra 	GMain
+.1337					LessEqual:
+>1337	0f						.byte 	CodeOpcode
+.1338	38		sec				sec
+.1339					GMain:
+.1339	08		php				php 								; save flip bit
+.133a	aa		tax				tax 								; save Base in X.
+.133b	18		clc				clc
+.133c	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.133e	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1340	aa		tax				tax
+.1341	38		sec				sec 								; do the comparison
+.1342	b5 02		lda $02,x			lda 	2,X
+.1344	f5 00		sbc $00,x			sbc 	0,x
+.1346	b5 03		lda $03,x			lda 	3,x
+.1348	f5 01		sbc $01,x			sbc		1,x
+.134a	90 b7		bcc $1303			bcc 	CondSucceed 				; >= true
+.134c	80 c1		bra $130f			bra 	CondFail 					; < false
 
 ;******  Return to file: sour16.asm
 
 
 ;******  Processing file: sourdebug.asm
 
-.1330					DebugPrintChar:
->1330	0f						.byte 	CodeOpcode
->1331	ff						.byte 	$FF
-.1332	a5 0a		lda $0a				lda 	Vars+2 						; get R1
-.1334	4c d2 ff	jmp $ffd2			jmp 	$FFD2 						; call output routine
+.134e					DebugPrintChar:
+>134e	0f						.byte 	CodeOpcode
+.134f	a5 0a		lda $0a				lda 	Vars+2 						; get R1
+.1351					OSPrintChar:
+.1351	4c d2 ff	jmp $ffd2			jmp 	$FFD2 						; call output routine
+.1354					DebugPrintHex:
+>1354	0f						.byte 	CodeOpcode
+.1355	a9 20		lda #$20			lda 	#' '
+.1357	20 51 13	jsr $1351			jsr 	OSPrintChar
+.135a	a5 0b		lda $0b				lda 	Vars+3
+.135c	20 61 13	jsr $1361			jsr 	_DPH1
+.135f	a5 0a		lda $0a				lda 	Vars+2
+.1361					_DPH1:
+.1361	48		pha				pha
+.1362	4a		lsr a				lsr 	a
+.1363	4a		lsr a				lsr 	a
+.1364	4a		lsr a				lsr 	a
+.1365	4a		lsr a				lsr 	a
+.1366	20 6a 13	jsr $136a			jsr 	_DPH2
+.1369	68		pla				pla
+.136a					_DPH2:
+.136a	29 0f		and #$0f			and 	#$0F
+.136c	c9 0a		cmp #$0a			cmp 	#$0A
+.136e	90 02		bcc $1372			bcc 	_DPH3
+.1370	69 06		adc #$06			adc 	#6
+.1372					_DPH3:
+.1372	69 30		adc #$30			adc 	#48
+.1374	4c 51 13	jmp $1351			jmp 	OSPrintChar
 
 ;******  Return to file: sour16.asm
 
-.1337					Sour16End:
+.1377					Sour16End:
 
 ;******  End of listing

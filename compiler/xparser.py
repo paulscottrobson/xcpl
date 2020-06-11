@@ -27,7 +27,7 @@ class TextParser(object):
 		self.charStack = ""
 		self.tokenStack = []
 		XCPLException.LINE = 1
-		self.doublePunct = { ">=":0,"<=":0,"<>":0,"==":0,"<<":0,">>":0  }	# Two char punc tokens.
+		self.doublePunct = { ">=":0,"<=":0,"<>":0,"==":0,"<<":0,">>":0,"++":0,"--":0  }	# Two char punc tokens.
 	#
 	#		Get a character from the stream
 	#
@@ -90,7 +90,7 @@ class TextParser(object):
 		#		Alphanumeric identiifer
 		#
 		if TextParser.ALPHA.find(ch.upper()) >= 0:							# Identifier.
-			return self.extract(ch,TextParser.ALPHANUM).lower()	
+			return self.extract(ch,TextParser.IDENTCHAR).lower()	
 		#
 		#		One or two character punctuation mix.
 		#
@@ -121,6 +121,7 @@ TextParser.DIGITS = "0123456789"											# token match lists.
 TextParser.HEXDIGITS = TextParser.DIGITS+"ABCDEF"
 TextParser.ALPHA = "ABDCDEFGHIJKLMNOPQRSTUVWXYZ"
 TextParser.ALPHANUM = TextParser.ALPHA+TextParser.DIGITS
+TextParser.IDENTCHAR = TextParser.ALPHANUM+"_."
 
 if __name__ == "__main__":
 	s = """

@@ -29,8 +29,12 @@ class InstructionCompiler(object):
 		assert codeGenerator is not None
 		self.cg = CodeGen(codeGenerator) 										# Wrap provided code generator
 		self.ident = identStore if identStore is not None else IdentStore()		# Create identifier store if reqd
+		self.paramCount = {}
 		self.termCompiler = TermCompiler(self.cg,self.ident)					# Create term/expression compiler
 		self.exprCompiler = ExpressionCompiler(self.cg,self.ident)				# workers.
+		for k in Sour16.ROUTINES.keys():										# copy routines in.
+			self.ident.set(True,k[:-1],Sour16.ROUTINES[k])						# as globals.
+			self.paramCount[Sour16.ROUTINES[k]] = int(k[-1])					# save parameter count
 	#
 	#		Compile one Instruction
 	#
@@ -100,11 +104,38 @@ class InstructionCompiler(object):
 				self.cg.c_sbi(1)												# save byte indirect
 			self.checkNext(stream,";")
 		#
-		#		Procedure invocation
+		#		Auto increment/decrement variable.
+		#
+		elif s == "++" or s == "--":
+			if r[0] != VType.VARREF:											# variable reference.
+				raise XCPLException("++/-- must be applied to variables")
+			self.termCompiler.loadConstantCode(1,r[1])							# address to R1
+			if s == "++":														# call appropriate function.
+				self.cg.c_call(Sour16.X_INCLOAD)
+			else:
+				self.cg.c_call(Sour16.X_DECLOAD)
+			self.checkNext(stream,";")
+		#
+		#		Procedure invocation. Params are stored in r1,r2,r3,r4 etc.
 		#
 		elif s == "(":	
-			# Must be VARREF.														
-			assert False,"TODO"
+			paramCount = 0														# how many parameters
+			s = stream.get()													# see if ) follows
+			if s != ")":
+				stream.put(s)													# if not, put it back
+				nextToken = ","
+				while nextToken == ",":											# keep going while more
+					paramCount += 1												# bump count and get params
+					self.exprCompiler.compileValue(stream,paramCount,self.termCompiler)	
+					nextToken = stream.get()									# see what is next.
+				if nextToken != ")":											# check final )
+					raise XCPLException("Missing ) from procedure call")
+			self.cg.c_call(r[1])												# generate call
+			if r[1] in self.paramCount:											# if we know the # of params
+				if paramCount != self.paramCount[r[1]]:							# check it
+					raise XCPLException("Parameter count mismatch")
+			self.checkNext(stream,";")
+		#
 		else:
 			raise XCPLException("Syntax Error")
 	#
@@ -128,9 +159,14 @@ if __name__ == "__main__":
 	ic = InstructionCompiler(X16CodeGen(1024,1024))
 	stream = TextParser("""
 		 { 
-		 	var test1,test2[12];
-		 	test1 = $ABCD;
-		 	test2!2 = $1357;
+		 	var ch;ch = 66;
+		 	print.char(42);
+		 	print.char(ch);
+		 	ch--;
+		 	print.char(ch);
+		 	print.hex($7A9F);
+		 	print.hex(ch <> 65);
+		 	print.hex(ch <> 166);
 		 }
 	""".strip().split("\n"))
 
@@ -145,7 +181,7 @@ if __name__ == "__main__":
 	ic.cg.c_xeq()
 	p = ic.cg.getCodePointer()
 	ic.cg.c_lcw(0,0xFFFF)
-	ic.cg.write(p,0xFF)
+	ic.cg.write(p+0,0xEA)
 	ic.cg.write(p+1,0x80)
 	ic.cg.write(p+2,0xFE)
 	ic.cg.writeProgram("test.prg")

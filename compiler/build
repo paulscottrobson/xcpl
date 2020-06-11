@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+pushd ../runtime
+./build
+popd
+rm -f dump*.bin
+#python _testcg.py
+#python _exprtest.py
+python instruction.py
+../bin/x16emu -debug -scale 2 -prg test.prg -run
+

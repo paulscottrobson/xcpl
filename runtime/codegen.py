@@ -23,6 +23,20 @@ class CodeGen(object):
 		return self.cg.updateFreeMemory()
 	def writeProgram(self,fileName):
 		return self.cg.writeProgram(fileName)
+	def c_brz(self,operand):
+		return self.cg.assemble(0x01,1,operand)
+	def c_brnz(self,operand):
+		return self.cg.assemble(0x02,1,operand)
+	def c_br(self,operand):
+		return self.cg.assemble(0x03,1,operand)
+	def c_chz(self,):
+		return self.cg.assemble(0x05,0)
+	def c_call(self,operand):
+		return self.cg.assemble(0x06,2,operand)
+	def c_ret(self,):
+		return self.cg.assemble(0x08,0)
+	def c_xeq(self,):
+		return self.cg.assemble(0x0f,0)
 	def c_lcw(self,reg,operand):
 		return self.cg.assemble(0x10+reg,2,operand)
 	def c_lcb(self,reg,operand):
@@ -49,18 +63,4 @@ class CodeGen(object):
 		return self.cg.assemble(0xc0+reg,2,operand)
 	def c_sia(self,reg):
 		return self.cg.assemble(0xe0+reg,0)
-	def c_brz(self,operand):
-		return self.cg.assemble(0x01,1,operand)
-	def c_brnz(self,operand):
-		return self.cg.assemble(0x02,1,operand)
-	def c_br(self,operand):
-		return self.cg.assemble(0x03,1,operand)
-	def c_chz(self,):
-		return self.cg.assemble(0x05,0)
-	def c_call(self,operand):
-		return self.cg.assemble(0x06,2,operand)
-	def c_ret(self,):
-		return self.cg.assemble(0x08,0)
-	def c_xeq(self,):
-		return self.cg.assemble(0x0f,0)
 	
