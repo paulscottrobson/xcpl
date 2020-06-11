@@ -60,5 +60,5 @@ class TestIdentStore(IdentStore):
 		self.set(True,"c",0xCC)
 		self.set(True,"d",0xDD)
 		self.set(True,"minus1",-1)
-		self.set(False,"count",100)
+		self.set(False,"count",32)
 		self.set(False,"star",0x2A)

@@ -53,6 +53,7 @@ class BaseCodeGenClass(object):
 		self.uPointer += size
 		if self.uPointer >= self.uLimit:
 			raise XCPLException("Out of uninitialised data memory")
+		return addr
 	#
 	#		Get code pointer
 	#

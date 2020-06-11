@@ -10,6 +10,7 @@
 # *****************************************************************************
 
 from error import *
+import traceback
 
 # *****************************************************************************
 #
@@ -50,7 +51,7 @@ class TextParser(object):
 	#
 	def get(self):
 		if len(self.tokenStack) > 0:										# Something on the stack
-			return self.tokenStack.pop(0)
+			return self.tokenStack.pop()
 		#
 		ch = self.getChar()													# Get character
 		if ch == "":														# Nothing left.
@@ -113,7 +114,7 @@ class TextParser(object):
 	#		Put one element back
 	#
 	def put(self,element):
-		self.tokenStack.insert(0,element)
+		self.tokenStack.append(element)
 
 TextParser.LINEMARKER = chr(128)											# used to mark line ends.
 TextParser.DIGITS = "0123456789"											# token match lists.

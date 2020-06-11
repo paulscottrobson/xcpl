@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Mon Jun  8 20:11:19 2020
+; Thu Jun 11 09:13:11 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -226,7 +226,7 @@
 .11f1	90 02		bcc $11f5			bcc 	CSIANoCarry 				; carry to MSB
 .11f3	e6 09		inc $09				inc 	Vars+1
 .11f5					CSIANoCarry:
-.11f5	4c 1b 12	jmp $121b			jmp 	Sour16NextSkip2
+.11f5	4c 26 12	jmp $1226			jmp 	Sour16Next
 .11f8					Shift_Left:
 .11f8	16 08		asl $08,x			asl 	Vars,x
 .11fa	36 09		rol $09,x			rol 	Vars+1,x

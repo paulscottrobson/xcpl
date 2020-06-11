@@ -253,7 +253,7 @@ Command_StoreIndirectAdvance: ;; SIA @
 		bcc 	CSIANoCarry 				; carry to MSB
 		inc 	Vars+1
 CSIANoCarry:		
-		jmp 	Sour16NextSkip2
+		jmp 	Sour16Next
 
 ; *****************************************************************************
 ;
