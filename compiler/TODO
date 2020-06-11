@@ -1,20 +1,17 @@
 Process:
 
 Instruction
+	- Import routines in.
+	- Procedure invocation (print character/print hex)
 	- Add ++ and -- (INC(R1) DEC(R1))
 	- Conditions (if .. else)
 	- Loops (while/repeat?)
 	-  .... some form of repeat loop, requires index simplified for.
-	- Procedure invocation
 
 Code 
 - Procedure declaration (execute last defined)
 - Variable declaration (global) 
 - Some parameter count check ??? - assoc. value with identifier optionally.
-
-
-var <data>,							// 2 bytes uninitialised
-	<data2>[8]						// 2 bytes initialised referencing uninitialised 8 words
 
 Data tables imported seperately ?
 Inline code ?

@@ -58,18 +58,25 @@ runTime = bytes(open("sour16.prg","rb").read(-1))[2:]
 #
 #		Output Runtime a Python class.
 #
+routines = {}
 keys = [x for x in constants.keys()]
 keys.sort(key = lambda x:constants[x])
 h = open("sour16.py","w")
 h.write("#\n#\tAutomatically generated.\n#\n")
 h.write("class Sour16(object):\n\tpass\n\n")
 for k in keys:
-	s = "X_"+k[1:-1] if k.startswith("[") else k
+	s = k
+	if k.startswith("["):
+		s = "X_"+k[1:-1] 
+		if k[-2] >= '0' and k[-2] <= '9':
+			routines[k[1:-1]] = constants[k]
 	if k == "loadaddr":
 		h.write("\n")
 	h.write("Sour16.{0} = 0x{1:02x}\n".format(s.upper(),constants[k]))
 
 h.write("\nSour16.DECODE = {0}\n".format(str(disasm)))
+r = ",".join(['"{0}":0x{1:04x}'.format(r,routines[r]) for r in routines.keys()])
+h.write("\nSour16.ROUTINES = [ {0} ]\n".format(r))
 h.write("\nSour16.RUNTIME = [ {0} ]\n".format(",".join(["0x{0:02x}".format(c) for c in runTime])))
 h.close()
 #

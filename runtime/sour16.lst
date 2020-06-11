@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Thu Jun 11 09:13:11 2020
+; Thu Jun 11 09:29:48 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -16,7 +16,7 @@
 .1004					StartVector:
 >1004	00 00 00 00					.word 	0,0
 .1008					HighMemory:
->1008	30 13						.word 	Sour16End
+>1008	37 13						.word 	Sour16End
 
 ;******  Processing file: sourmisc.asm
 
@@ -465,6 +465,17 @@
 
 ;******  Return to file: sour16.asm
 
-.1330					Sour16End:
+
+;******  Processing file: sourdebug.asm
+
+.1330					DebugPrintChar:
+>1330	0f						.byte 	CodeOpcode
+>1331	ff						.byte 	$FF
+.1332	a5 0a		lda $0a				lda 	Vars+2 						; get R1
+.1334	4c d2 ff	jmp $ffd2			jmp 	$FFD2 						; call output routine
+
+;******  Return to file: sour16.asm
+
+.1337					Sour16End:
 
 ;******  End of listing

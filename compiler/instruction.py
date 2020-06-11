@@ -146,4 +146,6 @@ if __name__ == "__main__":
 	p = ic.cg.getCodePointer()
 	ic.cg.c_lcw(0,0xFFFF)
 	ic.cg.write(p,0xFF)
+	ic.cg.write(p+1,0x80)
+	ic.cg.write(p+2,0xFE)
 	ic.cg.writeProgram("test.prg")
