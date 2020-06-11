@@ -12,6 +12,7 @@ Code
 - Procedure declaration (execute last defined)
 - Variable declaration (global) 
 - Some parameter count check ??? - assoc. value with identifier optionally.
+- Clear uninitialised data on run.
 
 Data tables imported seperately ?
 Inline code ?
