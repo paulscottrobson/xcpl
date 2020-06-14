@@ -1,9 +1,11 @@
 Process:
 
 bytes/words data term.
-
+ bytes(x,x,x,x)
+ words(x,x,x,x)
+ 
 Instruction
-	- Loops (while/repeat?)
+	- Loops (while)
 	- Conditions (if .. else)
 	-  .... some form of repeat loop, requires index simplified for.
 

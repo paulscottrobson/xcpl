@@ -44,8 +44,10 @@ class InstructionCompiler(object):
 			return False
 		elif s == "{":															# code group.
 			self.compileBlock(stream)
-		elif s == "var":
+		elif s == "var":			
 			self.compileVariableDeclaration(stream,False)
+		elif s == "repeat":
+			self.compileRepeat(stream)
 		else:																	# don't recognise it.
 			stream.put(s)														# put it back
 			self.compileIdentifier(stream)										# assume it's an identifier.
@@ -84,6 +86,17 @@ class InstructionCompiler(object):
 		#
 		if cont != ";":															# must end with ;
 			raise XCPLException("Missing ; on variable definition")
+	#
+	#		Compile a repeat loop
+	#
+	def compileRepeat(self,stream):
+		loopAddr = self.getAddress()											# get loop address.
+		self.compile(stream)													# check the block
+		self.checkNext(stream,"until")											# check for until
+		self.exprCompiler.compileValue(stream,1,self.termCompiler)				# test
+		branchAddr = self.compileBranch("Z")									# compile branch.
+		self.patchBranch(branchAddr,loopAddr)									# fix up branch.
+		self.checkNext(stream,";")
 	#
 	#		Compile when an identifier is the first element. Can be an assignment, procedure call.
 	#	
@@ -149,9 +162,34 @@ class InstructionCompiler(object):
 	#
 	def isIdentifier(self,t):
 		return t[0] >= 'a' and t[0] <= 'z'
-
-
-
+	#
+	#		Get current PC address
+	#
+	def getAddress(self):
+		return self.cg.getCodePointer()
+	#
+	#		Compile a branch
+	#
+	def compileBranch(self,branchType = ""):
+		addr = self.getAddress()												# where the branch is
+		if branchType == "":													# compile the appropriate branch
+			self.cg.c_br(0)
+		elif branchType == "NZ":
+			self.cg.c_brnz(0)
+		elif branchType == "Z":
+			self.cg.c_brz(0)
+		else:
+			assert False
+		return addr
+	#
+	#		Patch a branch
+	#
+	def patchBranch(self,branchAddr,targetAddr):
+		offset = targetAddr - (branchAddr+1)									# offset
+		print("{0:x} {1:x} {2}".format(branchAddr,targetAddr,offset))
+		if offset < -128 or offset > 127:										# how big is the offset
+			raise XCPLException("Loop is too large")
+		self.cg.write(branchAddr+1,offset & 0xFF)								# patch it up.
 
 
 
@@ -159,14 +197,16 @@ if __name__ == "__main__":
 	ic = InstructionCompiler(X16CodeGen(1024,1024))
 	stream = TextParser("""
 		 { 
-		 	var ch;ch = 66;
-		 	print.char(42);
-		 	print.char(ch);
-		 	ch--;
-		 	print.char(ch);
-		 	print.hex($7A9F);
-		 	print.hex(ch <> 65);
-		 	print.hex(ch <> 166);
+		 	!$9F20 = 0;
+		 	?$9F22 = 16;
+		 	var c;
+		 	c = 128*60;
+		 	repeat {
+		 		?$9F23 = 42;
+		 		?$9f23 = 7;
+		 		c--;
+		 	} until (c == 0);
+
 		 }
 	""".strip().split("\n"))
 
