@@ -1,5 +1,7 @@
 Process:
 
+bytes/words data term.
+
 Instruction
 	- Loops (while/repeat?)
 	- Conditions (if .. else)
