@@ -1,15 +1,13 @@
 Process:
  
-Instruction
-	-  .... some form of repeat loop, requires index simplified for.
-
-Code 
+File
 - Procedure declaration (execute last defined) - don't forget parameter count.
 - Variable declaration (global) 
+
+Changes
 - Clear uninitialised data on run.
+- Import code in as pre-assembled relocatable code that can be mashed together to make a library.
 
-
-Import code in as pre-assembled relocatable code that can be mashed together to make a library.
 Some sort of call-relative ?
 Installable vector handler ?
 

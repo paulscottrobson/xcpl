@@ -53,6 +53,8 @@ class InstructionCompiler(object):
 			self.compileRepeat(stream)
 		elif s == "while":
 			self.compileWhile(stream)
+		elif s == "do":															
+			self.compileDo(stream)		
 		else:																	# don't recognise it.
 			stream.put(s)														# put it back
 			self.compileIdentifier(stream)										# assume it's an identifier.
@@ -129,6 +131,32 @@ class InstructionCompiler(object):
 		loopBackAddr = self.compileBranch() 									# loop back to before test.
 		self.patchBranch(loopBackAddr,loopAddr)
 		self.patchBranch(branchAddr,self.getAddress())							# fix up branch after test
+	#
+	#		Compile a do loop
+	#
+	def compileDo(self,stream):
+		self.checkNext(stream,"(")												# must have a bracket
+		self.exprCompiler.compileValue(stream,1,self.termCompiler)				# the loop count into R1
+		s = stream.get()														# what follows ?
+		if s == ",":															# user provided variable
+			s = self.termCompiler.compile(stream,0,self)						# get that variable
+			if s[0] != VType.VARREF:
+				raise XCPLException("Do loop index must be a variable")
+			addr = s[1]															# index address.
+			self.checkNext(stream,")")											# check closing bracket
+		elif s == ")":															# automatic variable
+			addr = self.cg.allocUninitialised(2)								# so get space for it
+		else:
+			raise XCPLException("Syntax Error")
+		self.termCompiler.loadConstantCode(0,addr)								# save initial index value.
+		self.cg.c_sia(1)														# store it
+		doLoop = self.getAddress()												# top of loop
+		self.termCompiler.loadConstantCode(1,addr)								# decrement count at top of loop
+		self.cg.c_call(Sour16.X_DECLOAD)
+		self.compile(stream)													# loop body.
+		self.cg.c_ldr(1,addr)													# load loop counter into R1
+		branchCode = self.compileBranch("NZ")									# branch back if non zero
+		self.patchBranch(branchCode,doLoop)
 	#
 	#		Compile when an identifier is the first element. Can be an assignment, procedure call.
 	#	
@@ -229,16 +257,10 @@ if __name__ == "__main__":
 	ic = InstructionCompiler(X16CodeGen(1024,1024))
 	stream = TextParser("""
 		 { 
-		 	var t1;t1 = bytes(1,2,3,5);
-		 	t1 = words(1,256,517);
-		 	var c;c = 10;
-		 	print.string("HELLO, WORLD!");print.char(13);
-		 	while (c) {
-		 		print.hex(c);
-				if (c % 2 == 0) { print.string("EVEN"); } else { print.string("ODD"); }
-		 		c--;
-		 		print.char(13);
-		 	} 
+		 	var c;
+		 	print.char(42);
+		 	do (60000) {
+		 	} print.char(42);
 		 }
 	""".strip().split("\n"))
 
