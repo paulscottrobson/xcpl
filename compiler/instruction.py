@@ -25,22 +25,26 @@ from expression import *
 # *****************************************************************************
 
 class InstructionCompiler(object):
-	def __init__(self,codeGenerator,identStore = None):
+	def __init__(self,codeGenerator,identStore):
 		assert codeGenerator is not None
 		self.cg = CodeGen(codeGenerator) 										# Wrap provided code generator
-		self.ident = identStore if identStore is not None else IdentStore()		# Create identifier store if reqd
+		self.ident = identStore													# save ident store
 		self.paramCount = {}
 		self.termCompiler = TermCompiler(self.cg,self.ident)					# Create term/expression compiler
 		self.exprCompiler = ExpressionCompiler(self.cg,self.ident)				# workers.
 		for k in Sour16.ROUTINES.keys():										# copy routines in.
-			self.ident.set(True,k[:-1],Sour16.ROUTINES[k])						# as globals.
-			self.paramCount[Sour16.ROUTINES[k]] = int(k[-1])					# save parameter count
+			self.defineProcedure(k[:-1],Sour16.ROUTINES[k],int(k[-1]))
+	#
+	#		Define a procedure
+	#
+	def defineProcedure(self,name,addr,paramCount):			
+		self.ident.set(True,name,addr)											# as globals.
+		self.paramCount[addr] = paramCount										# save parameter count
 	#
 	#		Compile one Instruction
 	#
 	def compile(self,stream):
 		s = stream.get()														# get next token.
-		print(">>>",s)
 		if s == "":																# check something.
 			return False
 		elif s == "{":															# code group.
@@ -254,7 +258,7 @@ class InstructionCompiler(object):
 
 
 if __name__ == "__main__":
-	ic = InstructionCompiler(X16CodeGen(1024,1024))
+	ic = InstructionCompiler(X16CodeGen(1024,1024),IdentStore())
 	stream = TextParser("""
 		 { 
 		 	var c,d[128];
