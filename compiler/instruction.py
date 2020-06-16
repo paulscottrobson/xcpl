@@ -229,6 +229,8 @@ if __name__ == "__main__":
 	ic = InstructionCompiler(X16CodeGen(1024,1024))
 	stream = TextParser("""
 		 { 
+		 	var t1;t1 = bytes(1,2,3,5);
+		 	t1 = words(1,256,517);
 		 	var c;c = 10;
 		 	print.string("HELLO, WORLD!");print.char(13);
 		 	while (c) {

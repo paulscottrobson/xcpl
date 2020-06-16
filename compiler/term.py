@@ -50,6 +50,11 @@ class TermCompiler(object):
 		if t[0] >= '0' and t[0] <= '9':											# constant
 			return [VType.CONST,int(t)]
 		#
+		#		Byte or word data.
+		#
+		elif t == "bytes" or t == "words":										# byte or word definition
+				return [VType.CONST,self.createTable(stream,t == "bytes",expressionCompiler)]
+		#
 		#		Identifier
 		#
 		elif t[0] >= 'a' and t[0] <= 'z':
@@ -102,6 +107,7 @@ class TermCompiler(object):
 				self.convertToValue(value,regLevel)								# make it a value.
 				self.negateRegister(regLevel)
 				return [VType.VALUE]
+
 		else:
 			raise XCPLException("Syntax error "+t)
 	#
@@ -149,7 +155,29 @@ class TermCompiler(object):
 	def negateRegister(self,reg):
 		self.loadConstantCode(15,reg)											# RF to what we negate
 		self.cg.c_call(Sour16.X_NEGATE)											# negate it.
-
+	#
+	#		Create a table
+	#
+	def createTable(self,stream,isByte,expressionCompiler):
+		if stream.get() != "(":													# check open bracket.
+			raise XCPLException("Missing (")
+		done = False
+		addr = None
+		while not done:
+			t = self.compile(stream,1,expressionCompiler)						# get next
+			if t[0] != VType.CONST:												# must be a constant of some sort
+				raise XCPLException("Table entries can only be constants")
+			if isByte and t[1] > 0xFF:											# word data in byte table
+				raise XCPLException("Word data in byte table")
+			a = self.cg.writeDataMemory(t[1] & 0xFF)							# write LSB
+			addr = a if addr is None else addr 									# save addr of first if first
+			if not isByte:
+				self.cg.writeDataMemory(t[1] >> 8)
+			s = stream.get()													# what follows , or )
+			if s != ")" and s != ",":
+				raise XCPLException("Syntax error")
+			done = (s == ")")
+		return addr
 	#
 	#		Test routine. Uses self for parenthesis, so (a+b) won't work.
 	#
@@ -181,6 +209,8 @@ if __name__ == "__main__":
 		!d
 		?4096
 		!4096
+		bytes(1,2,3)
+		words(4,9,12)
 	""".split("\n"))
-	for i in range(0,21):
+	for i in range(0,23):
 			tc.test(stream)
