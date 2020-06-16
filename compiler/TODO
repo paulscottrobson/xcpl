@@ -5,8 +5,6 @@ bytes/words data term.
  words(x,x,x,x)
  
 Instruction
-	- Loops (while)
-	- Conditions (if .. else)
 	-  .... some form of repeat loop, requires index simplified for.
 
 Code 
@@ -14,8 +12,11 @@ Code
 - Variable declaration (global) 
 - Clear uninitialised data on run.
 
-Data tables imported seperately ?
-Inline code ?
+
+Import code in as pre-assembled relocatable code that can be mashed together to make a library.
+Some sort of call-relative ?
+Installable vector handler ?
+
 
 
 

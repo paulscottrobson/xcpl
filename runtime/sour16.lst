@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Sun Jun 14 16:44:01 2020
+; Tue Jun 16 15:57:33 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -16,7 +16,7 @@
 .1004					StartVector:
 >1004	00 00 00 00					.word 	0,0
 .1008					HighMemory:
->1008	77 13						.word 	Sour16End
+>1008	85 13						.word 	Sour16End
 
 ;******  Processing file: sourmisc.asm
 
@@ -495,32 +495,43 @@
 .134f	a5 0a		lda $0a				lda 	Vars+2 						; get R1
 .1351					OSPrintChar:
 .1351	4c d2 ff	jmp $ffd2			jmp 	$FFD2 						; call output routine
-.1354					DebugPrintHex:
+.1354					DebugPrintString:
 >1354	0f						.byte 	CodeOpcode
-.1355	a9 20		lda #$20			lda 	#' '
-.1357	20 51 13	jsr $1351			jsr 	OSPrintChar
-.135a	a5 0b		lda $0b				lda 	Vars+3
-.135c	20 61 13	jsr $1361			jsr 	_DPH1
-.135f	a5 0a		lda $0a				lda 	Vars+2
-.1361					_DPH1:
-.1361	48		pha				pha
-.1362	4a		lsr a				lsr 	a
-.1363	4a		lsr a				lsr 	a
-.1364	4a		lsr a				lsr 	a
-.1365	4a		lsr a				lsr 	a
-.1366	20 6a 13	jsr $136a			jsr 	_DPH2
-.1369	68		pla				pla
-.136a					_DPH2:
-.136a	29 0f		and #$0f			and 	#$0F
-.136c	c9 0a		cmp #$0a			cmp 	#$0A
-.136e	90 02		bcc $1372			bcc 	_DPH3
-.1370	69 06		adc #$06			adc 	#6
-.1372					_DPH3:
-.1372	69 30		adc #$30			adc 	#48
-.1374	4c 51 13	jmp $1351			jmp 	OSPrintChar
+.1355	a0 00		ldy #$00			ldy 	#0
+.1357					_DPSLoop:
+.1357	b1 0a		lda ($0a),y			lda 	(Vars+2),y
+.1359	f0 06		beq $1361			beq 	_DPSExit
+.135b	20 51 13	jsr $1351			jsr 	OSPrintChar
+.135e	c8		iny				iny
+.135f	80 f6		bra $1357			bra 	_DPSLoop
+.1361					_DPSExit:
+.1361	60		rts				rts
+.1362					DebugPrintHex:
+>1362	0f						.byte 	CodeOpcode
+.1363	a9 20		lda #$20			lda 	#' '
+.1365	20 51 13	jsr $1351			jsr 	OSPrintChar
+.1368	a5 0b		lda $0b				lda 	Vars+3
+.136a	20 6f 13	jsr $136f			jsr 	_DPH1
+.136d	a5 0a		lda $0a				lda 	Vars+2
+.136f					_DPH1:
+.136f	48		pha				pha
+.1370	4a		lsr a				lsr 	a
+.1371	4a		lsr a				lsr 	a
+.1372	4a		lsr a				lsr 	a
+.1373	4a		lsr a				lsr 	a
+.1374	20 78 13	jsr $1378			jsr 	_DPH2
+.1377	68		pla				pla
+.1378					_DPH2:
+.1378	29 0f		and #$0f			and 	#$0F
+.137a	c9 0a		cmp #$0a			cmp 	#$0A
+.137c	90 02		bcc $1380			bcc 	_DPH3
+.137e	69 06		adc #$06			adc 	#6
+.1380					_DPH3:
+.1380	69 30		adc #$30			adc 	#48
+.1382	4c 51 13	jmp $1351			jmp 	OSPrintChar
 
 ;******  Return to file: sour16.asm
 
-.1377					Sour16End:
+.1385					Sour16End:
 
 ;******  End of listing

@@ -40,14 +40,19 @@ class InstructionCompiler(object):
 	#
 	def compile(self,stream):
 		s = stream.get()														# get next token.
+		print(">>>",s)
 		if s == "":																# check something.
 			return False
 		elif s == "{":															# code group.
 			self.compileBlock(stream)
-		elif s == "var":			
+		elif s == "var":														# Variable declaration
 			self.compileVariableDeclaration(stream,False)
-		elif s == "repeat":
+		elif s == "if":															# Condition.
+			self.compileIf(stream)
+		elif s == "repeat":														# Loops
 			self.compileRepeat(stream)
+		elif s == "while":
+			self.compileWhile(stream)
 		else:																	# don't recognise it.
 			stream.put(s)														# put it back
 			self.compileIdentifier(stream)										# assume it's an identifier.
@@ -87,6 +92,22 @@ class InstructionCompiler(object):
 		if cont != ";":															# must end with ;
 			raise XCPLException("Missing ; on variable definition")
 	#
+	#		Compile an if / else command
+	#
+	def compileIf(self,stream):
+		self.exprCompiler.compileValue(stream,1,self.termCompiler)				# test
+		branchAddr = self.compileBranch("Z")									# compile branch if failed.
+		self.compile(stream);													# body
+		s = stream.get()														# check for else ?
+		if s == "else":
+			newBranch = self.compileBranch()									# branch out after if clause
+			self.patchBranch(branchAddr,self.getAddress())						# fix up if IF failed.
+			self.compile(stream)												# else body
+			self.patchBranch(newBranch,self.getAddress())						# branch to skip else code
+		else:																		
+			stream.put(s)														# no else, put it back	
+			self.patchBranch(branchAddr,self.getAddress())						# complete the branch
+	#
 	#		Compile a repeat loop
 	#
 	def compileRepeat(self,stream):
@@ -97,6 +118,17 @@ class InstructionCompiler(object):
 		branchAddr = self.compileBranch("Z")									# compile branch.
 		self.patchBranch(branchAddr,loopAddr)									# fix up branch.
 		self.checkNext(stream,";")
+	#
+	#		Compile a while loop
+	#
+	def compileWhile(self,stream):
+		loopAddr = self.getAddress()											# get loop address.
+		self.exprCompiler.compileValue(stream,1,self.termCompiler)				# test
+		branchAddr = self.compileBranch("Z")									# compile branch out.
+		self.compile(stream)													# check the block
+		loopBackAddr = self.compileBranch() 									# loop back to before test.
+		self.patchBranch(loopBackAddr,loopAddr)
+		self.patchBranch(branchAddr,self.getAddress())							# fix up branch after test
 	#
 	#		Compile when an identifier is the first element. Can be an assignment, procedure call.
 	#	
@@ -197,16 +229,14 @@ if __name__ == "__main__":
 	ic = InstructionCompiler(X16CodeGen(1024,1024))
 	stream = TextParser("""
 		 { 
-		 	!$9F20 = 0;
-		 	?$9F22 = 16;
-		 	var c;
-		 	c = 128*60;
-		 	repeat {
-		 		?$9F23 = 42;
-		 		?$9f23 = 7;
+		 	var c;c = 10;
+		 	print.string("HELLO, WORLD!");print.char(13);
+		 	while (c) {
+		 		print.hex(c);
+				if (c % 2 == 0) { print.string("EVEN"); } else { print.string("ODD"); }
 		 		c--;
-		 	} until (c == 0);
-
+		 		print.char(13);
+		 	} 
 		 }
 	""".strip().split("\n"))
 

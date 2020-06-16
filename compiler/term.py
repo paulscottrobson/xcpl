@@ -60,9 +60,10 @@ class TermCompiler(object):
 		#
 		#		String
 		#
-		elif t[0] == '"':														# string
-			addr = self.cg.writeDataMemory(len(t)-1)							# string length.
-			for c in t[1:]:														# string text
+		elif t[0] == '"':			
+			t = t[1:]+chr(0)													# string to write has $00 added
+			addr = self.cg.writeDataMemory(ord(t[0]))							# first char - must be one
+			for c in t[1:]:														# rest of string text/null
 				self.cg.writeDataMemory(ord(c))	
 			return [VType.CONST,addr]
 		#

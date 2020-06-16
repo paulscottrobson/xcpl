@@ -114,6 +114,9 @@ MachineCodeCaller:							; part of XEQ
 ;	This calls the code following the opcode, and when that code returns
 ;	it does a Subroutine Return.
 ;
+;	Because of pre-build subroutines this *has* to be $0F. (hence the
+;	addres offset of $F0, $0F << 4)
+;
 ; *****************************************************************************
 
 		* = Sour16Base+$F0

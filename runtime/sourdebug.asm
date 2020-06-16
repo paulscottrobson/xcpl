@@ -21,6 +21,18 @@ DebugPrintChar:		;; [PRINT.CHAR1]
 OSPrintChar:		
 		jmp 	$FFD2 						; call output routine
 
+DebugPrintString: 	;; [PRINT.STRING1]
+		.byte 	CodeOpcode
+		ldy 	#0
+_DPSLoop:
+		lda 	(Vars+2),y
+		beq 	_DPSExit
+		jsr 	OSPrintChar
+		iny
+		bra 	_DPSLoop
+_DPSExit:
+		rts
+
 DebugPrintHex:		;; [PRINT.HEX1]
 		.byte 	CodeOpcode
 		lda 	#' '
@@ -44,3 +56,4 @@ _DPH2:
 _DPH3:		
 		adc 	#48
 		jmp 	OSPrintChar
+		
