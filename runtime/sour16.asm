@@ -32,6 +32,10 @@ StartVector:								; +4 is the start of the Sour16 code.
 		.word 	0,0 					
 HighMemory:									; +8 is the first free byte.
 		.word 	Sour16End
+StartUninitialised:							; +10 is the start of uninitialised memory
+		.word 	0
+EndUninitialised:							; +12 is the end of uninitialised memory
+		.word 	0
 
 		.include 	"sourmisc.asm"			; miscellaneous functions.
 		.include 	"sourcore.asm"			; core operations

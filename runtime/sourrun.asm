@@ -22,7 +22,25 @@ RunProgram:
 		sta 	pctr
 		lda 	StartVector+1
 		sta 	pctr+1
-		bra 	Sour16Next
+
+		lda 	StartUninitialised 			; erase uninitialised data.
+		sta 	temp0
+		lda 	StartUninitialised+1
+		sta 	temp0+1
+RPClearMem:
+		lda 	EndUninitialised 			; check reached end
+		cmp 	temp0
+		bne 	RPEraseNext
+		lda 	EndUninitialised+1
+		cmp 	temp0+1
+		beq 	Sour16Next 					; reached end, exit.
+RPEraseNext:		
+		lda 	#0 							; clear meemory.
+		sta 	(temp0)
+		inc 	temp0 						; go to next byte
+		bne 	RPClearMem
+		inc 	temp0+1
+		bra 	RPClearMem
 
 ; *****************************************************************************
 ;

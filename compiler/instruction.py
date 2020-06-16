@@ -257,7 +257,7 @@ if __name__ == "__main__":
 	ic = InstructionCompiler(X16CodeGen(1024,1024))
 	stream = TextParser("""
 		 { 
-		 	var c;
+		 	var c,d[128];
 		 	print.char(42);
 		 	do (60000) {
 		 	} print.char(42);

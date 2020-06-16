@@ -29,6 +29,8 @@ class BaseCodeGenClass(object):
 		self.base = Sour16.LOADADDR 											# the load address
 		freeMem = self.code[8]+self.code[9]*256
 		self._setupMemoryUsage(freeMem,uninitSize,initSize)
+		self.write(self.base+10,self.uPointer & 0xFF)							# set base address uninitialised
+		self.write(self.base+11,self.uPointer >> 8)
 		self.codeStart = self.codePtr
 		self.listCode = None
 	#
@@ -133,6 +135,8 @@ class BaseCodeGenClass(object):
 	#
 	def writeProgram(self,fileName):
 		self.updateFreeMemory()													# Update free memory pointer
+		self.write(self.base+12,self.uPointer & 0xFF)							# set limit uninitialised memory
+		self.write(self.base+13,self.uPointer >> 8)
 		h = open(fileName,"wb")
 		h.write(bytes([self.base & 0xFF,self.base >> 8]))						# Write out position prefix.
 		h.write(bytes(self.code))												# Body
