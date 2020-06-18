@@ -29,7 +29,6 @@ class InstructionCompiler(object):
 		assert codeGenerator is not None
 		self.cg = codeGenerator													# save code generator
 		self.ident = identStore													# save ident store
-		self.paramCount = {}
 		self.termCompiler = TermCompiler(self.cg,self.ident)					# Create term/expression compiler
 		self.exprCompiler = ExpressionCompiler(self.cg,self.ident)				# workers.
 		for k in Sour16.ROUTINES.keys():										# copy routines in.
@@ -39,7 +38,7 @@ class InstructionCompiler(object):
 	#
 	def defineProcedure(self,name,addr,paramCount):			
 		self.ident.set(True,name,addr)											# as globals.
-		self.paramCount[addr] = paramCount										# save parameter count
+		self.ident.setAssoc(addr,paramCount)									# save parameter count
 	#
 	#		Compile one Instruction
 	#
@@ -228,8 +227,9 @@ class InstructionCompiler(object):
 				if nextToken != ")":											# check final )
 					raise XCPLException("Missing ) from procedure call")
 			self.cg.c_call(r[1])												# generate call
-			if r[1] in self.paramCount:											# if we know the # of params
-				if paramCount != self.paramCount[r[1]]:							# check it
+			pCount = self.ident.getAssoc(r[1])									# get associated value
+			if pCount is None:													# if we know the # of params
+				if paramCount != pCount:										# check it
 					raise XCPLException("Parameter count mismatch")
 			self.checkNext(stream,";")
 		#

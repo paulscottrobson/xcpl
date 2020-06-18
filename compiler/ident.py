@@ -21,6 +21,7 @@ class IdentStore(object):
 	def __init__(self):
 		self.locals = {}
 		self.globals = {}
+		self.assoc = {}
 	#
 	#		Set a value
 	#
@@ -46,6 +47,13 @@ class IdentStore(object):
 	#
 	def clearLocals(self):
 		self.locals = {}
+	#
+	#		Get/Set associated values
+	#
+	def getAssoc(self,k):
+		return self.assoc[k] if k in self.assoc else None
+	def setAssoc(self,k,v):
+		self.assoc[k] = v
 
 # *****************************************************************************
 #
