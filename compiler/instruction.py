@@ -27,7 +27,7 @@ from expression import *
 class InstructionCompiler(object):
 	def __init__(self,codeGenerator,identStore):
 		assert codeGenerator is not None
-		self.cg = CodeGen(codeGenerator) 										# Wrap provided code generator
+		self.cg = codeGenerator													# save code generator
 		self.ident = identStore													# save ident store
 		self.paramCount = {}
 		self.termCompiler = TermCompiler(self.cg,self.ident)					# Create term/expression compiler
@@ -278,7 +278,7 @@ class InstructionCompiler(object):
 
 
 if __name__ == "__main__":
-	ic = InstructionCompiler(X16CodeGen(1024,1024),IdentStore())
+	ic = InstructionCompiler(CodeGen(X16CodeGen(1024,1024)),IdentStore())
 	stream = TextParser("""
 		 { 
 		 	var c,d[128];

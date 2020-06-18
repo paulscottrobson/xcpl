@@ -1,15 +1,15 @@
 Process:
  
 File
-- Variable declaration (global) 
+- Revamp parameter count code.
 - Procedure declaration (execute last defined) - don't forget parameter count.
 
 Build
 - Import code in as pre-assembled relocatable code that can be mashed together to make a library.
 
-Some sort of call-relative ?
-Installable vector handler ?
-
+Optimise arithmetic constants.
+Look at optimising (later after some code !) x!4 to a single "load word x and add 4 instruction" 
+(e.g. generates a word reference) ? 
 
 
 

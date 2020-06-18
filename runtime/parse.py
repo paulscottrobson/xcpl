@@ -128,7 +128,7 @@ for k in disasm.keys():
 	if mnemonic.find("#") >= 0:
 		parameters.append("operand")
 		paramCount = 2
-	h.write("\tdef c_{0}(self,{1}):\n".format(mnemonic.split()[0],",".join(parameters)))
+	h.write("\tdef c_{0}(self{2}{1}):\n".format(mnemonic.split()[0],",".join(parameters),"," if len(parameters) > 0 else ""))
 	h.write("\t\treturn self.cg.assemble({0},{1}{2})\n".format(opcode,paramCount,"" if paramCount == 0 else ",operand"))
 
 h.write("\t")
