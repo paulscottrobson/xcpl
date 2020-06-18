@@ -42,17 +42,39 @@ class FileCompiler(object):
 				if not self.ic.isIdentifier(s):
 					raise XCPLException("Syntax Error")
 				procAddr = self.cg.getCodePointer()							# start of procedure
+				paramCount = 0
 				self.lastProcedure = procAddr
-				self.ident.set(True,s,procAddr)								# set the definition.
 				self.ident.clearLocals()									# no locals defined.
 				self.ic.checkNext(stream,"(")								# parameter open.
-				s = stream.get()											# get next
-				if s != ")":												# process parameters.
-					stream.put(s)											# put it back
-					self.compileWriteParameters()							# write the parameters out.
+				sn = stream.get()											# get next
+				if sn != ")":												# process parameters.
+					stream.put(sn)											# put it back
+					paramCount = self.compileWriteParameters(stream)		# write the parameters out.
+					print(paramCount)
+				self.ic.defineProcedure(s,procAddr,paramCount)					
 				self.ic.compile(stream)										# compile the body.
 				self.cg.c_ret()												
 			s = stream.get()
+	#
+	#		Handle parameters
+	#
+	def compileWriteParameters(self,stream):
+		paramList = []														# list of param names
+		s = ","														
+		while s == ",":														# repeat loop :)
+			ident = stream.get()
+			if not self.ic.isIdentifier(ident):
+				raise XCPLException("Bad parameter")
+			paramList.append(ident)
+			s = stream.get()
+		if s != ")":														# check closing )
+			raise XCPLException("Syntax Error")
+		paramBlock = self.cg.allocUninitialised(len(paramList)*2)			# allocate memory
+		self.cg.c_lcw(0,paramBlock)											# load into R0
+		for i in range(0,len(paramList)):									# for each param
+			self.ident.set(False,paramList[i],paramBlock+i*2)				# save address
+			self.cg.c_sia(i+1)												# save param from reg
+		return len(paramList)
 
 if __name__ == "__main__":
 	fc = FileCompiler(CodeGen(X16CodeGen(1024,1024)),IdentStore())
@@ -63,7 +85,21 @@ if __name__ == "__main__":
 			n = c;
 			print.char(42);
 		}
-		star2() { star();star(); }
+		double(cz) {
+			print.char(cz);print.char(cz);
+		}
+		star2() { star();star();double(64); }
+
+		twoChar(c1,c2) { print.char(c1);print.char(c2); }
+
+		lotsChar(n,c) { do(n) { print.char(c); } }
+
+		main() {
+			var n;
+			do(20,n) {
+			lotsChar(n+1,42);
+			print.char(13); }
+		}
 	""".strip().split("\n"))
 
 #	codeStart = fc.cg.getCodePointer()

@@ -33,7 +33,7 @@ BranchNonZero:			;; BRNZ +
 		bne 	BranchTrue
 BranchFalse:		
 		inc 	pctr
-		bcc 	BranchFalseNoCarry
+		bne 	BranchFalseNoCarry
 		inc 	pctr+1
 BranchFalseNoCarry:
 		jmp 	Sour16Next

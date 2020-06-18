@@ -1,8 +1,5 @@
 Process:
  
-File
-- Procedure declaration (execute last defined) - don't forget parameter count.
-
 Build
 - Import code in as pre-assembled relocatable code that can be mashed together to make a library.
 

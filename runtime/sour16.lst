@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Thu Jun 18 16:25:53 2020
+; Thu Jun 18 17:26:24 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -38,7 +38,7 @@
 .1024	d0 0a		bne $1030			bne 	BranchTrue
 .1026					BranchFalse:
 .1026	e6 28		inc $28				inc 	pctr
-.1028	90 02		bcc $102c			bcc 	BranchFalseNoCarry
+.1028	d0 02		bne $102c			bne 	BranchFalseNoCarry
 .102a	e6 29		inc $29				inc 	pctr+1
 .102c					BranchFalseNoCarry:
 .102c	4c 48 12	jmp $1248			jmp 	Sour16Next
