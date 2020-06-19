@@ -15,6 +15,7 @@ from ident import *
 from codegen import *
 from x16codegen import *
 from instruction import *
+import os
 
 # *****************************************************************************
 #
@@ -29,9 +30,10 @@ class FileCompiler(object):
 		self.ic = InstructionCompiler(codeGenerator,identStore)
 		self.lastProcedure = None
 	#
-	#		Compile one file stream
+	#		Compile one stream
 	#
-	def compile(self,stream):
+	def compileStream(self,stream):
+		XCPLException.LINE = 1												# reset line #
 		s = stream.get() 													# get first word
 		while s != "":
 			if s == "var":													# variable definition.
@@ -55,6 +57,7 @@ class FileCompiler(object):
 				self.ic.compile(stream)										# compile the body.
 				self.cg.c_ret()												
 			s = stream.get()
+		return self.lastProcedure
 	#
 	#		Handle parameters
 	#
@@ -75,36 +78,22 @@ class FileCompiler(object):
 			self.ident.set(False,paramList[i],paramBlock+i*2)				# save address
 			self.cg.c_sia(i+1)												# save param from reg
 		return len(paramList)
+	#
+	#		Compile one file
+	#
+	def compileFile(self,fileName):
+		XCPLException.FILE = fileName										# set up for error.
+		XCPLException.LINE = 0
+		if not os.path.isfile(fileName):									# check file exists.
+			raise XCPLException("Missing file "+fileName)
+		stream = TextParser(open(fileName).readlines())						# make a stream
+		self.compileStream(stream)											# compile it.
+		return self.lastProcedure
 
 if __name__ == "__main__":
 	fc = FileCompiler(CodeGen(X16CodeGen(1024,1024)),IdentStore())
-	stream = TextParser("""
-		var n;
-		const c = 43;	
-		star() {
-			n = c;
-			print.char(42);
-		}
-		double(cz) {
-			print.char(cz);print.char(cz);
-		}
-		star2() { star();star();double(64); }
-
-		twoChar(c1,c2) { print.char(c1);print.char(c2); }
-
-		lotsChar(n,c) { do(n) { print.char(c); } }
-
-		main() {
-			var n;
-			do(20,n) {
-			lotsChar(n+1,42);
-			print.char(13); }
-		}
-	""".strip().split("\n"))
-
-#	codeStart = fc.cg.getCodePointer()
 	fc.ic.cg.setListHandle()
-	fc.compile(stream)
+	mainProgram = fc.compileFile("test.x")
 
 	print("............")
 	fc.ic.cg.setExecuteAddress(fc.ic.cg.getCodePointer())
