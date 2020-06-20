@@ -38,8 +38,6 @@ class FileCompiler(object):
 		while s != "":
 			if s == "var":													# variable definition.
 				self.ic.compileVariableDeclaration(stream,True)
-			elif s == "const":												# constant definition
-				self.ic.compileConstantDeclaration(stream,True)
 			else:															# must be a proc defn.			
 				if not self.ic.isIdentifier(s):
 					raise XCPLException("Syntax Error")

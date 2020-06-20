@@ -50,8 +50,6 @@ class InstructionCompiler(object):
 			self.compileBlock(stream)
 		elif s == "var":														# Variable declaration
 			self.compileVariableDeclaration(stream,False)
-		elif s == "const":
-			self.compileConstantDeclaration(stream,False)
 		elif s == "if":															# Condition.
 			self.compileIf(stream)
 		elif s == "repeat":														# Loops
@@ -95,24 +93,6 @@ class InstructionCompiler(object):
 			else:
 				addr = self.cg.allocUninitialised(2)							# just a word
 			self.ident.set(isGlobal,ident,addr)									# define it.
-		#
-		if cont != ";":															# must end with ;
-			raise XCPLException("Missing ; on variable definition")
-	#
-	#		Compile a constant declaration.
-	#
-	def compileConstantDeclaration(self,stream,isGlobal):
-		cont = ","
-		while cont == ",":														# keep going while more
-			ident = stream.get()												# new name
-			if not self.isIdentifier(ident):
-				raise XCPLException("Missing constant name")
-			self.checkNext(stream,"=")
-			value = self.termCompiler.compile(stream,0,self.exprCompiler)		# get amount
-			if value[0] != VType.CONST:											# which must be a constant
-				raise XCPLException("Constant definition requires a constant")
-			cont = stream.get()
-			self.ident.set(isGlobal,ident,value[1])								# define it.
 		#
 		if cont != ";":															# must end with ;
 			raise XCPLException("Missing ; on variable definition")
@@ -283,7 +263,7 @@ if __name__ == "__main__":
 	stream = TextParser("""
 		 { 
 		 	var c,d[128];
-		 	const star = 42;
+		 	var star;star = 42;
 		 	print.char(star);
 		 	do (60000) {
 		 	} print.char(star);

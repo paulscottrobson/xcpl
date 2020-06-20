@@ -1,7 +1,5 @@
 var n;
-const c = 43;	
 star() {
-	n = c;
 	print.char(42);
 }
 double(cz) {
