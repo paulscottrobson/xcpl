@@ -209,7 +209,6 @@ class InstructionCompiler(object):
 			self.cg.c_call(r[1])												# generate call
 			pCount = self.ident.getAssoc(r[1])									# get associated value
 			if pCount is not None:												# if we know the # of params
-				print(pCount,paramCount,r[1],self.ident.assoc)
 				if paramCount != pCount:										# check it
 					raise XCPLException("Parameter count mismatch")
 			self.checkNext(stream,";")

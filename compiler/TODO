@@ -5,7 +5,6 @@ Build
 - Import source files
 - Import code in as pre-assembled relocatable code that can be mashed together to make a library.
 
-Add Macros
 LEN RND ABS SGN
 Optimise arithmetic constants.
 Look at optimising (later after some code !) x!4 to a single "load word x and add 4 instruction" 

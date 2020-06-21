@@ -23,6 +23,7 @@ class TextParser(object):
 		text = [x if x.find("#") < 0 else x[:x.find("#")] for x in text]	# Remove comments
 		text = [x.replace("\t"," ").strip() for x in text]					# Remove tabs and strip
 		self.src = (" "+TextParser.LINEMARKER).join(text)					# Make one long string
+		self.macroDepth = 0
 		self.current = 0
 		self.charStack = ""
 		self.tokenStack = []
@@ -90,7 +91,18 @@ class TextParser(object):
 		#		Alphanumeric identiifer
 		#
 		if TextParser.ALPHA.find(ch.upper()) >= 0:							# Identifier.
-			return self.extract(ch,TextParser.IDENTCHAR).lower()	
+			ident = self.extract(ch,TextParser.IDENTCHAR).lower()			# get identifier
+			if ident == "define":											# macro definition
+				self.defineMacro()											# do that definition
+				ident = self.get()											# and get the nex item
+			if ident in TextParser.Macros:									# is it a macro ?
+				self.macroDepth += 1										# we track too much recursion
+				if self.macroDepth == 5:									# and this is too much recursion
+					raise XCPLException("Define macros too deep")
+				self.src = TextParser.Macros[ident]+" "+self.src			# put into the source
+				self.macroDepth -= 1
+				ident = self.get()											# and get it.
+			return ident
 		#
 		#		One or two character punctuation mix.
 		#
@@ -111,6 +123,17 @@ class TextParser(object):
 			self.putChar(ch)
 		return s
 	#
+	#		Handle macro definition
+	#
+	def defineMacro(self):
+		name = self.get()													# get name must be identifier
+		body = self.get()													# get body must be quoted string
+		if TextParser.ALPHA.find(name[0].upper()) < 0 or body[0] != '"':	# check syntax
+			raise XCPLException("Bad macro syntax")
+		if name in TextParser.Macros and TextParser.Macros[name] != body:	# check redefinition
+			raise XCPLException("Macro "+name+" redefined")
+		TextParser.Macros[name] = body[1:] 									# save macro
+	#
 	#		Put one element back
 	#
 	def put(self,element):
@@ -123,9 +146,12 @@ TextParser.ALPHA = "ABDCDEFGHIJKLMNOPQRSTUVWXYZ"
 TextParser.ALPHANUM = TextParser.ALPHA+TextParser.DIGITS
 TextParser.IDENTCHAR = TextParser.ALPHANUM+"_."
 
+TextParser.Macros = {  }													# macro store.
+
 if __name__ == "__main__":
 	s = """
 #	Hello world
+define text "chips in gravy"
 432 $4A3 '*' "hello, world"
 this is a00 >>=<4
 text element		# with a comment
