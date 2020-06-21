@@ -42,6 +42,7 @@ EndUninitialised:							; +12 is the end of uninitialised memory
 		.include 	"sourrun.asm" 			; main execution functions
 		.include	"sourmath.asm" 			; arithmetic
 		.include 	"sourcompare.asm"		; comparisons
+		.include 	"sourunary.asm"			; unary functions.
 		.include 	"sourdebug.asm"			; debug helper stuff.		
 
 Sour16End:

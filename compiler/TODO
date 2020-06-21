@@ -1,12 +1,14 @@
 Process:
 
+- Implement RANDOM ABS SIGN
+- Document strlen, random, Abs, Sign
+
 Build
 - Project file (list of files, type defines action)
 - Import source files
 - Import code in as pre-assembled relocatable code that can be mashed together to make a library.
 
-LEN RND ABS SGN
-Optimise arithmetic constants.
+
 Look at optimising (later after some code !) x!4 to a single "load word x and add 4 instruction" 
 (e.g. generates a word reference) ? 
 

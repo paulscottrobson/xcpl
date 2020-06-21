@@ -53,7 +53,18 @@ class TermCompiler(object):
 		#		Byte or word data.
 		#
 		elif t == "bytes" or t == "words":										# byte or word definition
-				return [VType.CONST,self.createTable(stream,t == "bytes",expressionCompiler)]
+			return [VType.CONST,self.createTable(stream,t == "bytes",expressionCompiler)]
+		#
+		#		Unary function
+		#
+		if t == "strlen" or t == "random" or t == "sign" or t == "abs":			# unary functions
+			if t != "random":													# random doesn't take param
+				value = self.compile(stream,regLevel,expressionCompiler) 		# what to negate ?
+				self.convertToValue(value,regLevel)								# make it a value.
+			self.loadConstantCode(15,regLevel)									# RF to what we work on.
+			self.cg.c_call(self.identStore.get("unary"+t))						# compile call.
+			return [VType.VALUE]
+
 		#
 		#		Identifier
 		#
@@ -107,7 +118,6 @@ class TermCompiler(object):
 				self.convertToValue(value,regLevel)								# make it a value.
 				self.negateRegister(regLevel)
 				return [VType.VALUE]
-
 		else:
 			raise XCPLException("Syntax error "+t)
 	#
@@ -211,6 +221,7 @@ if __name__ == "__main__":
 		!4096
 		bytes(1,2,3)
 		words(4,9,12)
+		len("hello")
 	""".split("\n"))
-	for i in range(0,23):
+	for i in range(0,24):
 			tc.test(stream)

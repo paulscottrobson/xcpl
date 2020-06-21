@@ -16,5 +16,8 @@ lotsChar(n,c) { do(n) { print.char(c); } }
 main() {
 	do(40,n) {
 	lotsChar(n+1,c.to.print);
-	print.char(13); }
+	print.char(13);
+	}
+	var msg;msg = "hello, world!";
+	print.hex(strlen(msg));
 }

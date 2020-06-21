@@ -186,7 +186,7 @@ if __name__ == "__main__":
 	ec = ExpressionCompiler(codeGen,idStore)
 
 	src = """
-		2&3-count+1
+		1+2 
 	""".strip().split("\n")
 
 	stream = TextParser(src)

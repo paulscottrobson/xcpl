@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Sun Jun 21 09:41:53 2020
+; Sun Jun 21 11:13:00 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -16,7 +16,7 @@
 .1004					StartVector:
 >1004	00 00 00 00					.word 	0,0
 .1008					HighMemory:
->1008	a7 13						.word 	Sour16End
+>1008	c3 13						.word 	Sour16End
 .100a					StartUninitialised:
 >100a	00 00						.word 	0
 .100c					EndUninitialised:
@@ -509,50 +509,75 @@
 ;******  Return to file: sour16.asm
 
 
-;******  Processing file: sourdebug.asm
+;******  Processing file: sourunary.asm
 
-.1370					DebugPrintChar:
+.1370					StringLength:
 >1370	0f						.byte 	CodeOpcode
-.1371	a5 0a		lda $0a				lda 	Vars+2 						; get R1
-.1373					OSPrintChar:
-.1373	4c d2 ff	jmp $ffd2			jmp 	$FFD2 						; call output routine
-.1376					DebugPrintString:
->1376	0f						.byte 	CodeOpcode
-.1377	a0 00		ldy #$00			ldy 	#0
-.1379					_DPSLoop:
-.1379	b1 0a		lda ($0a),y			lda 	(Vars+2),y
-.137b	f0 06		beq $1383			beq 	_DPSExit
-.137d	20 73 13	jsr $1373			jsr 	OSPrintChar
-.1380	c8		iny				iny
-.1381	80 f6		bra $1379			bra 	_DPSLoop
-.1383					_DPSExit:
-.1383	60		rts				rts
-.1384					DebugPrintHex:
->1384	0f						.byte 	CodeOpcode
-.1385	a9 20		lda #$20			lda 	#' '
-.1387	20 73 13	jsr $1373			jsr 	OSPrintChar
-.138a	a5 0b		lda $0b				lda 	Vars+3
-.138c	20 91 13	jsr $1391			jsr 	_DPH1
-.138f	a5 0a		lda $0a				lda 	Vars+2
-.1391					_DPH1:
-.1391	48		pha				pha
-.1392	4a		lsr a				lsr 	a
-.1393	4a		lsr a				lsr 	a
-.1394	4a		lsr a				lsr 	a
-.1395	4a		lsr a				lsr 	a
-.1396	20 9a 13	jsr $139a			jsr 	_DPH2
-.1399	68		pla				pla
-.139a					_DPH2:
-.139a	29 0f		and #$0f			and 	#$0F
-.139c	c9 0a		cmp #$0a			cmp 	#$0A
-.139e	90 02		bcc $13a2			bcc 	_DPH3
-.13a0	69 06		adc #$06			adc 	#6
-.13a2					_DPH3:
-.13a2	69 30		adc #$30			adc 	#48
-.13a4	4c 73 13	jmp $1373			jmp 	OSPrintChar
+.1371	aa		tax				tax 								; save Base in X.
+.1372	18		clc				clc
+.1373	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
+.1375	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
+.1377	aa		tax				tax
+.1378	b5 00		lda $00,x			lda 	0,x 						; string pos to temp0
+.137a	85 2a		sta $2a				sta 	temp0
+.137c	b5 01		lda $01,x			lda 	1,x
+.137e	85 2b		sta $2b				sta 	temp0+1
+.1380	a0 ff		ldy #$ff			ldy 	#255 						; get length (max 255)
+.1382					_SLLoop:
+.1382	c8		iny				iny 								; pre increment
+.1383	b1 2a		lda ($2a),y			lda 	(temp0),y
+.1385	d0 fb		bne $1382			bne 	_SLLoop
+.1387	94 00		sty $00,x			sty 	0,x 						; write result out and exit.
+.1389	74 01		stz $01,x			stz 	1,x
+.138b	60		rts				rts
 
 ;******  Return to file: sour16.asm
 
-.13a7					Sour16End:
+
+;******  Processing file: sourdebug.asm
+
+.138c					DebugPrintChar:
+>138c	0f						.byte 	CodeOpcode
+.138d	a5 0a		lda $0a				lda 	Vars+2 						; get R1
+.138f					OSPrintChar:
+.138f	4c d2 ff	jmp $ffd2			jmp 	$FFD2 						; call output routine
+.1392					DebugPrintString:
+>1392	0f						.byte 	CodeOpcode
+.1393	a0 00		ldy #$00			ldy 	#0
+.1395					_DPSLoop:
+.1395	b1 0a		lda ($0a),y			lda 	(Vars+2),y
+.1397	f0 06		beq $139f			beq 	_DPSExit
+.1399	20 8f 13	jsr $138f			jsr 	OSPrintChar
+.139c	c8		iny				iny
+.139d	80 f6		bra $1395			bra 	_DPSLoop
+.139f					_DPSExit:
+.139f	60		rts				rts
+.13a0					DebugPrintHex:
+>13a0	0f						.byte 	CodeOpcode
+.13a1	a9 20		lda #$20			lda 	#' '
+.13a3	20 8f 13	jsr $138f			jsr 	OSPrintChar
+.13a6	a5 0b		lda $0b				lda 	Vars+3
+.13a8	20 ad 13	jsr $13ad			jsr 	_DPH1
+.13ab	a5 0a		lda $0a				lda 	Vars+2
+.13ad					_DPH1:
+.13ad	48		pha				pha
+.13ae	4a		lsr a				lsr 	a
+.13af	4a		lsr a				lsr 	a
+.13b0	4a		lsr a				lsr 	a
+.13b1	4a		lsr a				lsr 	a
+.13b2	20 b6 13	jsr $13b6			jsr 	_DPH2
+.13b5	68		pla				pla
+.13b6					_DPH2:
+.13b6	29 0f		and #$0f			and 	#$0F
+.13b8	c9 0a		cmp #$0a			cmp 	#$0A
+.13ba	90 02		bcc $13be			bcc 	_DPH3
+.13bc	69 06		adc #$06			adc 	#6
+.13be					_DPH3:
+.13be	69 30		adc #$30			adc 	#48
+.13c0	4c 8f 13	jmp $138f			jmp 	OSPrintChar
+
+;******  Return to file: sour16.asm
+
+.13c3					Sour16End:
 
 ;******  End of listing
