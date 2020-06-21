@@ -61,6 +61,11 @@ class TermCompiler(object):
 			if t != "random":													# random doesn't take param
 				value = self.compile(stream,regLevel,expressionCompiler) 		# what to negate ?
 				self.convertToValue(value,regLevel)								# make it a value.
+			else:
+				c1 = stream.get()												# no parameters empty
+				c2 = stream.get()
+				if c1 != "(" or c2 != ")":
+					raise XCPLException("Syntax Error")
 			self.loadConstantCode(15,regLevel)									# RF to what we work on.
 			self.cg.c_call(self.identStore.get("unary"+t))						# compile call.
 			return [VType.VALUE]

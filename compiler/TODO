@@ -1,8 +1,5 @@
 Process:
 
-- Implement RANDOM ABS SIGN
-- Document strlen, random, Abs, Sign
-
 Build
 - Project file (list of files, type defines action)
 - Import source files

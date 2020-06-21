@@ -20,4 +20,12 @@ main() {
 	}
 	var msg;msg = "hello, world!";
 	print.hex(strlen(msg));
+	print.char(13);
+	print.hex(abs(-4));
+	print.char(13);
+	print.hex(sign(-4));
+	print.hex(sign(0));
+	print.hex(sign(4));
+	print.char(13);
+	do (10) print.hex(random());
 }

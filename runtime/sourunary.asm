@@ -17,7 +17,7 @@
 
 ; *****************************************************************************
 ;
-;									Multiply
+;								String Length
 ;
 ; *****************************************************************************
 
@@ -43,3 +43,91 @@ _SLLoop:
 		stz 	1,x
 		rts
 
+; *****************************************************************************
+;
+;								Absolute value
+;
+; *****************************************************************************
+
+Absolute:	 ;; [unaryabs1]		
+		.byte 	CodeOpcode
+		tax 								; save Base in X.
+		clc
+		adc 	15*2,X 						; add the base register in RF to it
+		adc	 	15*2,X 						; twice.
+		tax 	
+		bit 	1,x
+		bpl 	_AbsExit
+		sec
+		lda 	#0							; negate
+		sbc 	0,x
+		sta 	0,x
+		lda 	#0
+		sbc 	1,x
+		sta 	1,x
+_AbsExit:		
+		rts
+
+; *****************************************************************************
+;
+;								Sign of value
+;
+; *****************************************************************************
+
+SignInteger:	 ;; [unarysign1]		
+		.byte 	CodeOpcode
+		tax 								; save Base in X.
+		clc
+		adc 	15*2,X 						; add the base register in RF to it
+		adc	 	15*2,X 						; twice.
+		tax 	
+
+		ldy 	#0 							; return value
+		lda 	0,x
+		ora		1,x
+		beq 	_SIWrite 					; 0 if zero
+		dey  								; now return -1
+		bit 	1,x 						; if -ve return that
+		bmi 	_SIWrite
+		stz 	1,x 						; return 1
+		lda 	#1
+		sta 	0,x
+		rts
+
+_SIWrite:
+		sty 	0,x
+		sty 	1,x
+		rts		
+
+; *****************************************************************************
+;
+;								Random Integer
+;
+; *****************************************************************************
+
+RndInteger:	 ;; [unaryrandom1]		
+		.byte 	CodeOpcode
+		tax 								; save Base in X.
+		clc
+		adc 	15*2,X 						; add the base register in RF to it
+		adc	 	15*2,X 						; twice.
+		tax 	
+
+		lda 	0,x 						; seed cannot be zero
+		ora 	1,x
+		bne 	_RINotZero
+		dec 	0,x
+_RINotZero:
+
+		lda 	1,x 						; 16 bit xorshift rng
+		lsr 	a
+		lda 	0,x
+		ror 	a
+		eor 	1,x
+		sta 	1,x 
+		ror 	a
+		eor 	0,x
+		sta 	0,x 
+		eor 	1,x
+		sta 	1,x 
+		rts
