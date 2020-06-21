@@ -39,7 +39,7 @@ Sour16.X_LESS = 0x133e
 Sour16.X_GREATER = 0x1355
 Sour16.X_LESSEQUAL = 0x1359
 
-Sour16.DECODE = {1: 'brz +', 2: 'brnz +', 3: 'br +', 5: 'chz', 6: 'call #', 8: 'ret', 15: 'xeq', 16: 'lcw @,#', 32: 'lcb @,%', 48: 'add @', 64: 'sub @', 80: 'and @', 96: 'orr @', 112: 'xor @', 128: 'sbi @', 144: 'lwi @', 160: 'lbi @', 176: 'shf @', 192: 'ldr @,#', 224: 'sia @'}
+Sour16.DECODE = {16: 'lcw @,#', 32: 'lcb @,%', 48: 'add @', 64: 'sub @', 80: 'and @', 96: 'orr @', 112: 'xor @', 128: 'sbi @', 144: 'lwi @', 160: 'lbi @', 176: 'shf @', 192: 'ldr @,#', 224: 'sia @', 1: 'brz +', 2: 'brnz +', 3: 'br +', 5: 'chz', 6: 'call #', 8: 'ret', 15: 'xeq'}
 
 Sour16.ROUTINES = {	 "print.char1":0x1370,"print.string1":0x1376,"print.hex1":0x1384 }
 
