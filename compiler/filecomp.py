@@ -33,7 +33,7 @@ class FileCompiler(object):
 	#		Compile one stream
 	#
 	def compileStream(self,stream):
-		XCPLException.LINE = 1												# reset line #
+		XCPLException.LINE = 0												# reset line #
 		s = stream.get() 													# get first word
 		while s != "":
 			if s == "var":													# variable definition.

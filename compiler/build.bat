@@ -11,7 +11,7 @@ rem python instruction.py
 rem python filecomp.py
 zip -q -9 xc.zip *.py
 copy xc.zip ..\bin >NUL
-python xc.zip test.x -o test.prg
+python xc.zip -p test.xp
 if errorlevel 1 goto exit
 ..\bin\x16emu -debug -scale 2 -prg test.prg -run
 :exit

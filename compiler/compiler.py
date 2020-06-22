@@ -45,6 +45,16 @@ class CompilerManager(object):
 					self.listHandle = open(self.getParam(ctrl),"w")
 				elif s == "-o":
 					self.targetFile = self.getParam(ctrl)
+				elif s == "-p":
+					self.loadProject(self.getParam(ctrl))
+				elif s == "-i" or s == "-u":
+					size = self.getParam(ctrl)
+					if re.match("^\\d+$",size) is None or int(size) < 0 or int(size) > 16384:
+						raise XCPLException("Bad Data Size")
+					if s == "-i":
+						self.initDataSize = int(size)
+					else:
+						self.uninitDataSize = int(size)
 				else:
 					raise XCPLException("Unknown option "+s)
 			else:
@@ -56,6 +66,14 @@ class CompilerManager(object):
 		if len(ctrl) == 0:
 			raise XCPLException("Missing parameter")
 		return ctrl.pop(0)
+	#
+	#		Load in a project
+	#
+	def loadProject(self,projectFile):
+		if not os.path.isfile(projectFile):
+			raise XCPLException("Bad project file")
+		src = [x for x in open(projectFile).readlines() if not x.strip().startswith("#")]
+		self.loadControls(" ".join(src).split())
 	#
 	#		Build the program.
 	#
@@ -73,17 +91,25 @@ class CompilerManager(object):
 	#		Display the help file
 	#
 	def showHelp(self):
-		print("xc <files> -l <listfile> -lv -o <program file>")
-		print("\tXCPL Compiler v0.1 (alpha) 22-Jun-2020.\n\tWritten by Paul Robson 2020. MIT License.")
+		print("xc <files> -l <listfile> -lv -o <program file> -p <project file> -i <init data> -u <unint data>")
+		print("\tXCPL Compiler v0.11 (alpha) 22-Jun-2020.\n\tWritten by Paul Robson 2020. MIT License.")
 
 def run():
-	cm = CompilerManager()													# create instance
-	if len(sys.argv) == 1:
-		cm.showHelp()
+	XCPLException.LINE = 0
+	try:
+		cm = CompilerManager()												# create instance
+		if len(sys.argv) == 1:
+			cm.showHelp()
+			sys.exit(1)
+		cm.loadControls(sys.argv[1:])										# load files/flags/etc.
+		cm.build()															# build the program
+		sys.exit(0)															# exit without error.
+	except XCPLException as xe:
+		msg = str(xe)
+		if XCPLException.LINE != 0:
+			msg = "{0}({1}) {2}".format(XCPLException.FILE,XCPLException.LINE,msg)
+		print(msg)
 		sys.exit(1)
-	cm.loadControls(sys.argv[1:])											# load files/flags/etc.
-	cm.build()																# build the program
-	sys.exit(0)																# exit without error.
 
 
 if __name__ == "__main__":

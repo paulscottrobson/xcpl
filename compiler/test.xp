@@ -1,0 +1,4 @@
+ #
+ #		Demo test project
+ #
+ test.x -o test.prg -l test.lst 
