@@ -101,6 +101,7 @@ export = """
 	def setExecuteAddress(self,address):
 	def write(self,address,data):
 	def assemble(self,opcode,operandSize = 0,operand = None):
+	def getListHandle(self):
 	def setListHandle(self,handle = sys.stdout):
 	def getCodePointer(self):
 	def updateFreeMemory(self):

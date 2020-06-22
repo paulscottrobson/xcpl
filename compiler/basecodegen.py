@@ -119,15 +119,17 @@ class BaseCodeGenClass(object):
 				a = self.codePtr+1+(operand if (operand & 0x80) == 0 else (operand & 0xFF)-256)
 				c = c.replace("+","${0:04x}".format(a))	
 			c = c.split() + [ "" ]
-			print("{0:04x} : {1:10} : {2:8} {3}".format(self.codePtr,s,c[0],c[1]))
+			self.listCode.write("{0:04x} : {1:10} : {2:5} {3}\n".format(self.codePtr,s,c[0],c[1]))
 		#
 		self.codePtr += (operandSize + 1)										# advance code pointer
 		if self.codePtr >= self.codeLimit:
 			raise XCPLException("Out of program memory.")
 		return addr 
 	#
-	#		Set the listing code handle
+	#		Get/Set the listing code handle
 	#
+	def getListHandle(self):
+		return self.listCode
 	def setListHandle(self,handle = sys.stdout):
 		self.listCode = handle	
 	#

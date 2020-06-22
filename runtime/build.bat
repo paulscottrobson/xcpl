@@ -5,5 +5,4 @@ python parse.py
 if errorlevel 1 goto exit
 copy sour16.py  ..\compiler >NUL
 copy codegen.py ..\compiler >NUL
-echo "Built runtime"
 :exit

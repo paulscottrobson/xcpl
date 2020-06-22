@@ -1,8 +1,8 @@
 Process:
 
+- import raw binary data as a label (so testfile.bin is imported as variables testfile.data.addr and testfile.data.size)
+
 Build
-- Project file (list of files, type defines action)
-- Import source files
 - Import code in as pre-assembled relocatable code that can be mashed together to make a library.
 
 

@@ -55,6 +55,9 @@ class IdentStore(object):
 	def setAssoc(self,k,v):
 		self.assoc[k] = v
 
+	def findLabelByAddr(self,addr):
+		return ""
+		
 # *****************************************************************************
 #
 #						Debugging identifier store

@@ -41,6 +41,9 @@ class FileCompiler(object):
 			else:															# must be a proc defn.			
 				if not self.ic.isIdentifier(s):
 					raise XCPLException("Syntax Error")
+				h = self.cg.getListHandle()
+				if h is not None:
+					h.write(";\n;\t\t{0}()\n;\n".format(s))
 				procAddr = self.cg.getCodePointer()							# start of procedure
 				paramCount = 0
 				self.lastProcedure = procAddr

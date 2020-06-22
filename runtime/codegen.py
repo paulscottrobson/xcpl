@@ -15,6 +15,8 @@ class CodeGen(object):
 		return self.cg.write(address,data)
 	def assemble(self,opcode,operandSize = 0,operand = None):
 		return self.cg.assemble(opcode,operandSize,operand)
+	def getListHandle(self):
+		return self.cg.getListHandle()
 	def setListHandle(self,handle = sys.stdout):
 		return self.cg.setListHandle(handle)
 	def getCodePointer(self):
