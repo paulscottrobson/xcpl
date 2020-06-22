@@ -250,7 +250,6 @@ class InstructionCompiler(object):
 	#
 	def patchBranch(self,branchAddr,targetAddr):
 		offset = targetAddr - (branchAddr+1)									# offset
-		print("{0:x} {1:x} {2}".format(branchAddr,targetAddr,offset))
 		if offset < -128 or offset > 127:										# how big is the offset
 			raise XCPLException("Loop is too large")
 		self.cg.write(branchAddr+1,offset & 0xFF)								# patch it up.

@@ -50,7 +50,6 @@ class FileCompiler(object):
 				if sn != ")":												# process parameters.
 					stream.put(sn)											# put it back
 					paramCount = self.compileWriteParameters(stream)		# write the parameters out.
-					print(paramCount)
 				self.ic.defineProcedure(s,procAddr,paramCount)					
 				self.ic.compile(stream)										# compile the body.
 				self.cg.c_ret()												
