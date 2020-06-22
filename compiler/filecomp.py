@@ -87,19 +87,25 @@ class FileCompiler(object):
 		stream = TextParser(open(fileName).readlines())						# make a stream
 		self.compileStream(stream)											# compile it.
 		return self.lastProcedure
+	#
+	#		Write the start program.
+	#
+	def writeStartCode(self):
+		self.cg.setExecuteAddress(self.cg.getCodePointer())					# we run to this point
+		self.cg.c_call(self.lastProcedure)									# call last defined procedure
+		self.cg.c_br(0xFF)													# compile branch loop
+	#
+	#		Support pass-through functions
+	#
+	def setListHandle(self,handle = sys.stdout):
+		self.cg.setListHandle(handle)
+	def writeProgram(self,fileName):
+		self.cg.writeProgram(fileName)
 
 if __name__ == "__main__":
 	fc = FileCompiler(CodeGen(X16CodeGen(1024,1024)),IdentStore())
-	fc.ic.cg.setListHandle()
+	fc.setListHandle()
 	mainProgram = fc.compileFile("test.x")
-
 	print("............")
-	fc.ic.cg.setExecuteAddress(fc.ic.cg.getCodePointer())
-	fc.ic.cg.c_call(fc.lastProcedure)
-	fc.ic.cg.c_xeq()
-	p = fc.ic.cg.getCodePointer()	
-	fc.ic.cg.c_lcw(0,0xFFFF)
-	fc.ic.cg.write(p+0,0xEA)
-	fc.ic.cg.write(p+1,0x80)
-	fc.ic.cg.write(p+2,0xFE)
-	fc.ic.cg.writeProgram("test.prg")
+	fc.writeStartCode()
+	fc.writeProgram("test.prg")

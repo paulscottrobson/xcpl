@@ -28,4 +28,5 @@ main() {
 	print.hex(sign(4));
 	print.char(13);
 	do (10) print.hex(random());
+	n = n!4;
 }
