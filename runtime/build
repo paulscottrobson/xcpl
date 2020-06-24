@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+64tass -c -q sour16.asm -L sour16.lst -o sour16.prg -l sour16.lbl
+python parse.py
+cp sour16.py codegen.py ../compiler

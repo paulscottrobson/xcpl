@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -c -q -L sour16.lst -o sour16.prg -l sour16.lbl sour16.asm
-; Mon Jun 22 17:57:06 2020
+; Wed Jun 24 08:54:00 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -10,13 +10,14 @@
 >0008					Vars:	.fill 	16*2 						; registers in low/high byte pairs
 >0028					pctr:	.fill 	2							; address of current routine.
 >002a					temp0:	.fill 	2
+>002c					rseed:	.fill 	2							; random seed.
 .1000					Sour16Base:
 .1000	4c 0c 12	jmp $120c			jmp 	RunProgram
 .1003	ea		nop				nop 								; pad to 4 bytes.
 .1004					StartVector:
 >1004	00 00 00 00					.word 	0,0
 .1008					HighMemory:
->1008	22 14						.word 	Sour16End
+>1008	26 14						.word 	Sour16End
 .100a					StartUninitialised:
 >100a	00 00						.word 	0
 .100c					EndUninitialised:
@@ -120,7 +121,7 @@
 .1122	95 08		sta $08,x			sta 	Vars,X
 .1124	74 09		stz $09,x			stz 	Vars+1,X 					; zero the MSB.
 .1126	e6 28		inc $28				inc 	pctr 						; skip opcode
-.1128	90 02		bcc $112c			bcc 	_CLCBNoCarry
+.1128	d0 02		bne $112c			bne 	_CLCBNoCarry
 .112a	e6 29		inc $29				inc 	pctr+1
 .112c					_CLCBNoCarry:
 .112c	4c 48 12	jmp $1248			jmp 	Sour16Next 					; return
@@ -577,71 +578,73 @@
 .13ca	75 1e		adc $1e,x			adc 	15*2,X 						; add the base register in RF to it
 .13cc	75 1e		adc $1e,x			adc	 	15*2,X 						; twice.
 .13ce	aa		tax				tax
-.13cf	b5 00		lda $00,x			lda 	0,x 						; seed cannot be zero
-.13d1	15 01		ora $01,x			ora 	1,x
+.13cf	a5 2c		lda $2c				lda 	rseed 						; seed cannot be zero
+.13d1	05 2d		ora $2d				ora 	rseed+1
 .13d3	d0 02		bne $13d7			bne 	_RINotZero
-.13d5	d6 00		dec $00,x			dec 	0,x
+.13d5	c6 2c		dec $2c				dec 	rseed
 .13d7					_RINotZero:
-.13d7	b5 01		lda $01,x			lda 	1,x 						; 16 bit xorshift rng
+.13d7	a5 2d		lda $2d				lda 	rseed+1 					; 16 bit xorshift rng
 .13d9	4a		lsr a				lsr 	a
-.13da	b5 00		lda $00,x			lda 	0,x
+.13da	a5 2c		lda $2c				lda 	rseed
 .13dc	6a		ror a				ror 	a
-.13dd	55 01		eor $01,x			eor 	1,x
-.13df	95 01		sta $01,x			sta 	1,x
+.13dd	45 2d		eor $2d				eor 	rseed+1
+.13df	85 2d		sta $2d				sta 	rseed+1
 .13e1	6a		ror a				ror 	a
-.13e2	55 00		eor $00,x			eor 	0,x
-.13e4	95 00		sta $00,x			sta 	0,x
-.13e6	55 01		eor $01,x			eor 	1,x
-.13e8	95 01		sta $01,x			sta 	1,x
-.13ea	60		rts				rts
+.13e2	45 2c		eor $2c				eor 	rseed
+.13e4	85 2c		sta $2c				sta 	rseed
+.13e6	95 00		sta $00,x			sta 	0,x
+.13e8	45 2d		eor $2d				eor 	rseed+1
+.13ea	85 2d		sta $2d				sta 	rseed+1
+.13ec	95 01		sta $01,x			sta 	1,x
+.13ee	60		rts				rts
 
 ;******  Return to file: sour16.asm
 
 
 ;******  Processing file: sourdebug.asm
 
-.13eb					DebugPrintChar:
->13eb	0f						.byte 	CodeOpcode
-.13ec	a5 0a		lda $0a				lda 	Vars+2 						; get R1
-.13ee					OSPrintChar:
-.13ee	4c d2 ff	jmp $ffd2			jmp 	$FFD2 						; call output routine
-.13f1					DebugPrintString:
->13f1	0f						.byte 	CodeOpcode
-.13f2	a0 00		ldy #$00			ldy 	#0
-.13f4					_DPSLoop:
-.13f4	b1 0a		lda ($0a),y			lda 	(Vars+2),y
-.13f6	f0 06		beq $13fe			beq 	_DPSExit
-.13f8	20 ee 13	jsr $13ee			jsr 	OSPrintChar
-.13fb	c8		iny				iny
-.13fc	80 f6		bra $13f4			bra 	_DPSLoop
-.13fe					_DPSExit:
-.13fe	60		rts				rts
-.13ff					DebugPrintHex:
->13ff	0f						.byte 	CodeOpcode
-.1400	a9 20		lda #$20			lda 	#' '
-.1402	20 ee 13	jsr $13ee			jsr 	OSPrintChar
-.1405	a5 0b		lda $0b				lda 	Vars+3
-.1407	20 0c 14	jsr $140c			jsr 	_DPH1
-.140a	a5 0a		lda $0a				lda 	Vars+2
-.140c					_DPH1:
-.140c	48		pha				pha
-.140d	4a		lsr a				lsr 	a
-.140e	4a		lsr a				lsr 	a
-.140f	4a		lsr a				lsr 	a
-.1410	4a		lsr a				lsr 	a
-.1411	20 15 14	jsr $1415			jsr 	_DPH2
-.1414	68		pla				pla
-.1415					_DPH2:
-.1415	29 0f		and #$0f			and 	#$0F
-.1417	c9 0a		cmp #$0a			cmp 	#$0A
-.1419	90 02		bcc $141d			bcc 	_DPH3
-.141b	69 06		adc #$06			adc 	#6
-.141d					_DPH3:
-.141d	69 30		adc #$30			adc 	#48
-.141f	4c ee 13	jmp $13ee			jmp 	OSPrintChar
+.13ef					DebugPrintChar:
+>13ef	0f						.byte 	CodeOpcode
+.13f0	a5 0a		lda $0a				lda 	Vars+2 						; get R1
+.13f2					OSPrintChar:
+.13f2	4c d2 ff	jmp $ffd2			jmp 	$FFD2 						; call output routine
+.13f5					DebugPrintString:
+>13f5	0f						.byte 	CodeOpcode
+.13f6	a0 00		ldy #$00			ldy 	#0
+.13f8					_DPSLoop:
+.13f8	b1 0a		lda ($0a),y			lda 	(Vars+2),y
+.13fa	f0 06		beq $1402			beq 	_DPSExit
+.13fc	20 f2 13	jsr $13f2			jsr 	OSPrintChar
+.13ff	c8		iny				iny
+.1400	80 f6		bra $13f8			bra 	_DPSLoop
+.1402					_DPSExit:
+.1402	60		rts				rts
+.1403					DebugPrintHex:
+>1403	0f						.byte 	CodeOpcode
+.1404	a9 20		lda #$20			lda 	#' '
+.1406	20 f2 13	jsr $13f2			jsr 	OSPrintChar
+.1409	a5 0b		lda $0b				lda 	Vars+3
+.140b	20 10 14	jsr $1410			jsr 	_DPH1
+.140e	a5 0a		lda $0a				lda 	Vars+2
+.1410					_DPH1:
+.1410	48		pha				pha
+.1411	4a		lsr a				lsr 	a
+.1412	4a		lsr a				lsr 	a
+.1413	4a		lsr a				lsr 	a
+.1414	4a		lsr a				lsr 	a
+.1415	20 19 14	jsr $1419			jsr 	_DPH2
+.1418	68		pla				pla
+.1419					_DPH2:
+.1419	29 0f		and #$0f			and 	#$0F
+.141b	c9 0a		cmp #$0a			cmp 	#$0A
+.141d	90 02		bcc $1421			bcc 	_DPH3
+.141f	69 06		adc #$06			adc 	#6
+.1421					_DPH3:
+.1421	69 30		adc #$30			adc 	#48
+.1423	4c f2 13	jmp $13f2			jmp 	OSPrintChar
 
 ;******  Return to file: sour16.asm
 
-.1422					Sour16End:
+.1426					Sour16End:
 
 ;******  End of listing

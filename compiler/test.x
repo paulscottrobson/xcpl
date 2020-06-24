@@ -14,7 +14,7 @@ twoChar(c1,c2) { print.char(c1);print.char(c2); }
 lotsChar(n,c) { do(n) { print.char(c); } }
 
 main() {
-	do(20,n) {
+	do(50,n) {
 	lotsChar(n+1,c.to.print);
 	print.char(13);
 	}

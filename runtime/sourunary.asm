@@ -113,21 +113,23 @@ RndInteger:	 ;; [unaryrandom1]
 		adc	 	15*2,X 						; twice.
 		tax 	
 
-		lda 	0,x 						; seed cannot be zero
-		ora 	1,x
+		lda 	rseed 						; seed cannot be zero
+		ora 	rseed+1
 		bne 	_RINotZero
-		dec 	0,x
+		dec 	rseed
 _RINotZero:
 
-		lda 	1,x 						; 16 bit xorshift rng
+		lda 	rseed+1 					; 16 bit xorshift rng
 		lsr 	a
-		lda 	0,x
+		lda 	rseed
 		ror 	a
-		eor 	1,x
-		sta 	1,x 
+		eor 	rseed+1
+		sta 	rseed+1 
 		ror 	a
-		eor 	0,x
-		sta 	0,x 
-		eor 	1,x
-		sta 	1,x 
+		eor 	rseed
+		sta 	rseed 
+		sta 	0,x
+		eor 	rseed+1
+		sta 	rseed+1 
+		sta 	1,x
 		rts

@@ -14,7 +14,7 @@ from ident import *
 from codegen import *
 from x16codegen import *
 from filecomp import *
-import os,sys
+import os,sys,re
 
 # *****************************************************************************
 #

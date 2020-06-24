@@ -16,6 +16,7 @@
 Vars:	.fill 	16*2 						; registers in low/high byte pairs
 pctr:	.fill 	2							; address of current routine.
 temp0:	.fill 	2
+rseed:	.fill 	2							; random seed.
 
 ; *****************************************************************************
 ;

@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+pushd ../runtime
+./build
+popd
+rm -f dump*.bin xc.zip
+# python _testcg.py
+# python _exprtest.py
+# python instruction.py
+# python filecomp.py
+zip -q -9 xc.zip *.py
+cp xc.zip ../bin
+python xc.zip demo.x -u 6144 -o test.prg -l test.lst
+

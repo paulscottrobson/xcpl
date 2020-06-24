@@ -52,7 +52,7 @@ Command_LoadConstByte:		;; LCB @,%
 		sta 	Vars,X
 		stz 	Vars+1,X 					; zero the MSB.
 		inc 	pctr 						; skip opcode
-		bcc 	_CLCBNoCarry
+		bne 	_CLCBNoCarry
 		inc 	pctr+1
 _CLCBNoCarry:		
 		jmp 	Sour16Next 					; return

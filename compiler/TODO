@@ -1,13 +1,11 @@
-Process:
+Code:
+- Add Load word and add short constant instruction for x!n (n = 0..255) => wordref/byteref
 
+Process:
 - import raw binary data as a label (so testfile.bin is imported as variables testfile.data.addr and testfile.data.size)
 
 Build
 - Import code in as pre-assembled relocatable code that can be mashed together to make a library.
-
-
-Look at optimising (later after some code !) x!4 to a single "load word x and add 4 instruction" 
-(e.g. generates a word reference) ? 
 
 
 
